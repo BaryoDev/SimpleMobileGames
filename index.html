@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Games</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .game-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <header class="text-center mb-5">
+            <h1 class="display-4 header-title mb-3">HTML Games</h1>
+            <p class="lead text-muted">A collection of simple HTML5 games</p>
+        </header>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Flappy Bird Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm game-card" onclick="window.location.href='flappybird.html'">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
+                                class="bi bi-controller text-primary" viewBox="0 0 16 16">
+                                <path
+                                    d="M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0zm-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1v-1z" />
+                                <path
+                                    d="M3.051 3.26a.5.5 0 0 1 .354-.613l1.932-.518a.5.5 0 0 1 .62.39c.655-.079 1.35-.117 2.043-.117.72 0 1.443.041 2.12.126a.5.5 0 0 1 .622-.399l1.932.518a.5.5 0 0 1 .354.614c-2.434.729-5.105.729-7.539 0zm9.316 3.673a1 1 0 0 1 1-1h.002a1 1 0 0 1 1 1c0 .226-.053.449-.158.668a9.81 9.81 0 0 1-.301.581c-.389.71-.94 1.536-1.84 2.433-.806.806-1.78 1.38-2.875 1.702-.05.015-.1.028-.149.041-.26.068-.524.123-.79.164a12.14 12.14 0 0 1-1.483.093 12.15 12.15 0 0 1-1.482-.093c-.266-.04-.53-.096-.79-.164a5.8 5.8 0 0 1-.149-.041c-1.095-.322-2.069-.896-2.875-1.702-.9-.897-1.451-1.723-1.84-2.433a9.81 9.81 0 0 1-.301-.581c-.105-.219-.158-.442-.158-.668a1 1 0 0 1 1-1h.002a1 1 0 0 1 1 1c0 .276.06.531.169.773.012.027.025.053.037.08a8.53 8.53 0 0 0 .17.374c.308.615.773 1.295 1.508 2.03.74.74 1.55 1.175 2.4 1.418.06.017.12.033.18.048.36.094.732.166 1.11.216a11.14 11.14 0 0 0 1.11.058c.375 0 .748-.02 1.11-.058.378-.05.75-.122 1.109-.216.06-.015.12-.031.18-.048.85-.243 1.66-.678 2.4-1.418.735-.735 1.2-1.415 1.508-2.03.054-.118.111-.244.17-.374.012-.027.025-.053.037-.08.109-.242.169-.497.169-.773z" />
+                            </svg>
+                        </div>
+                        <h5 class="card-title">Flappy Bird</h5>
+                        <p class="card-text text-muted small">Navigate the bird through the pipes!</p>
+                        <a href="flappybird.html" class="btn btn-outline-primary mt-3">Play Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder for future games -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm text-muted bg-light">
+                    <div class="card-body text-center p-5 d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="card-title">More Games Coming Soon</h5>
+                        <p class="card-text small">Check back later!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
