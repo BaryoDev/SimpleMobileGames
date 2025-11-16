@@ -61,3 +61,7 @@ You can deploy these games for free using **Surge.sh**, a simple CLI for static 
 ## Credits
 
 These games were created using **Gemini 3 Pro** in the **AntiGravity IDE**.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
