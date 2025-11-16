@@ -19,6 +19,14 @@ A vertical scrolling shooter inspired by classic arcade games like Sonic Wings /
     - Score tracking and lives system.
     - Custom Canvas-drawn graphics.
 
+### 3. Dice Master
+A prediction game where you compete against a Markov Chain AI.
+- **Controls**: Select a number (1-6) and roll the dice.
+- **Features**:
+    - **Markov Chain AI**: Predicts your next roll based on historical patterns.
+    - **3D Dice Animation**: CSS-based 3D rolling effect.
+    - **Statistics**: Real-time frequency chart and accuracy comparison.
+
 ## How to Play
 
 1. Clone the repository or download the files.

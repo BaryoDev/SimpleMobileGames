@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Master - AI Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 3D Dice Styles */
+        .scene {
+            width: 100px;
+            height: 100px;
+            perspective: 400px;
+            margin: 50px auto;
+        }
+
+        .cube {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(-50px);
+            transition: transform 1s;
+        }
+
+        .cube.show-1 {
+            transform: translateZ(-50px) rotateY(0deg);
+        }
+
+        .cube.show-2 {
+            transform: translateZ(-50px) rotateY(-90deg);
+        }
+
+        .cube.show-3 {
+            transform: translateZ(-50px) rotateY(-180deg);
+        }
+
+        .cube.show-4 {
+            transform: translateZ(-50px) rotateY(90deg);
+        }
+
+        .cube.show-5 {
+            transform: translateZ(-50px) rotateX(-90deg);
+        }
+
+        .cube.show-6 {
+            transform: translateZ(-50px) rotateX(90deg);
+        }
+
+        .cube__face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #ecf0f1;
+            line-height: 100px;
+            font-size: 40px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .cube__face--1 {
+            transform: rotateY(0deg) translateZ(50px);
+        }
+
+        .cube__face--2 {
+            transform: rotateY(90deg) translateZ(50px);
+        }
+
+        .cube__face--3 {
+            transform: rotateY(180deg) translateZ(50px);
+        }
+
+        .cube__face--4 {
+            transform: rotateY(-90deg) translateZ(50px);
+        }
+
+        .cube__face--5 {
+            transform: rotateX(90deg) translateZ(50px);
+        }
+
+        .cube__face--6 {
+            transform: rotateX(-90deg) translateZ(50px);
+        }
+
+        /* Dot styling for dice faces */
+        .dot {
+            display: block;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+            position: absolute;
+        }
+
+        /* Face 1 */
+        .cube__face--1 .dot:nth-child(1) {
+            top: 41px;
+            left: 41px;
+        }
+
+        /* Face 2 */
+        .cube__face--2 .dot:nth-child(1) {
+            top: 20px;
+            left: 20px;
+        }
+
+        .cube__face--2 .dot:nth-child(2) {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        /* Face 3 */
+        .cube__face--3 .dot:nth-child(1) {
+            top: 20px;
+            left: 20px;
+        }
+
+        .cube__face--3 .dot:nth-child(2) {
+            top: 41px;
+            left: 41px;
+        }
+
+        .cube__face--3 .dot:nth-child(3) {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        /* Face 4 */
+        .cube__face--4 .dot:nth-child(1) {
+            top: 20px;
+            left: 20px;
+        }
+
+        .cube__face--4 .dot:nth-child(2) {
+            top: 20px;
+            right: 20px;
+        }
+
+        .cube__face--4 .dot:nth-child(3) {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .cube__face--4 .dot:nth-child(4) {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        /* Face 5 */
+        .cube__face--5 .dot:nth-child(1) {
+            top: 20px;
+            left: 20px;
+        }
+
+        .cube__face--5 .dot:nth-child(2) {
+            top: 20px;
+            right: 20px;
+        }
+
+        .cube__face--5 .dot:nth-child(3) {
+            top: 41px;
+            left: 41px;
+        }
+
+        .cube__face--5 .dot:nth-child(4) {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .cube__face--5 .dot:nth-child(5) {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        /* Face 6 */
+        .cube__face--6 .dot:nth-child(1) {
+            top: 20px;
+            left: 20px;
+        }
+
+        .cube__face--6 .dot:nth-child(2) {
+            top: 20px;
+            right: 20px;
+        }
+
+        .cube__face--6 .dot:nth-child(3) {
+            top: 41px;
+            left: 20px;
+        }
+
+        .cube__face--6 .dot:nth-child(4) {
+            top: 41px;
+            right: 20px;
+        }
+
+        .cube__face--6 .dot:nth-child(5) {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .cube__face--6 .dot:nth-child(6) {
+            bottom: 20px;
+            right: 20px;
+        }
+
+
+        .prediction-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-number {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .btn-number.selected {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .stat-bar {
+            height: 10px;
+            background: #34495e;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: #3498db;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .win-badge {
+            background: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .loss-badge {
+            background: #c0392b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .history-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container game-container">
+        <div class="text-center mb-4">
+            <h1 class="display-4 fw-bold text-warning">Dice Master</h1>
+            <p class="lead">User vs. Markov Chain AI</p>
+        </div>
+
+        <div class="row w-100">
+            <!-- Left Column: Stats & AI -->
+            <div class="col-md-4">
+                <div class="prediction-card">
+                    <h4 class="text-info">AI Prediction</h4>
+                    <div class="text-center my-3">
+                        <span id="ai-prediction-display" class="display-1 fw-bold text-white">-</span>
+                        <div class="small text-muted mt-2">Based on Markov Chain</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Accuracy:</span>
+                        <span id="ai-accuracy" class="fw-bold">0%</span>
+                    </div>
+                    <div class="d-flex justify-content-center mt-2">
+                        <span id="ai-result-badge" class="badge bg-secondary">Waiting...</span>
+                    </div>
+                </div>
+
+                <div class="prediction-card mt-3">
+                    <h5>Number Frequency</h5>
+                    <div id="frequency-chart">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Column: The Game -->
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <div class="scene">
+                    <div class="cube show-1" id="dice">
+                        <div class="cube__face cube__face--1">
+                            <div class="dot"></div>
+                        </div>
+                        <div class="cube__face cube__face--2">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="cube__face cube__face--3">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="cube__face cube__face--4">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="cube__face cube__face--5">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="cube__face cube__face--6">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <h5>Your Prediction</h5>
+                    <div class="d-flex justify-content-center flex-wrap" id="user-controls">
+                        <button class="btn btn-outline-light btn-number" onclick="selectNumber(1)">1</button>
+                        <button class="btn btn-outline-light btn-number" onclick="selectNumber(2)">2</button>
+                        <button class="btn btn-outline-light btn-number" onclick="selectNumber(3)">3</button>
+                        <button class="btn btn-outline-light btn-number" onclick="selectNumber(4)">4</button>
+                        <button class="btn btn-outline-light btn-number" onclick="selectNumber(5)">5</button>
+                        <button class="btn btn-outline-light btn-number" onclick="selectNumber(6)">6</button>
+                    </div>
+                    <div class="mt-3">
+                        <button id="roll-btn" class="btn btn-warning btn-lg px-5 fw-bold" onclick="rollDice()"
+                            disabled>ROLL DICE</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: User Stats -->
+            <div class="col-md-4">
+                <div class="prediction-card">
+                    <h4 class="text-warning">User Stats</h4>
+                    <div class="d-flex justify-content-between mt-3">
+                        <span>Wins:</span>
+                        <span id="user-wins">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Total:</span>
+                        <span id="total-rolls">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2 pt-2 border-top border-secondary">
+                        <span>Accuracy:</span>
+                        <span id="user-accuracy" class="fw-bold">0%</span>
+                    </div>
+                    <div class="d-flex justify-content-center mt-2">
+                        <span id="user-result-badge" class="badge bg-secondary">Waiting...</span>
+                    </div>
+                </div>
+
+                <div class="prediction-card mt-3">
+                    <h5>Recent History</h5>
+                    <div id="history-log" class="text-break">
+                        <!-- Dots will go here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-auto text-center py-3">
+            <a href="index.html" class="btn btn-outline-secondary btn-sm">Back to Menu</a>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let userSelection = null;
+        let isRolling = false;
+        let history = []; // Array of past rolls
+        let transitionMatrix = {}; // { "prev_roll": { "next_roll": count } }
+
+        // Stats
+        let totalRolls = 0;
+        let userWins = 0;
+        let aiWins = 0;
+        let numberCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+        // DOM Elements
+        const dice = document.getElementById('dice');
+        const rollBtn = document.getElementById('roll-btn');
+        const aiPredictionDisplay = document.getElementById('ai-prediction-display');
+        const aiAccuracyDisplay = document.getElementById('ai-accuracy');
+        const aiResultBadge = document.getElementById('ai-result-badge');
+        const userAccuracyDisplay = document.getElementById('user-accuracy');
+        const userWinsDisplay = document.getElementById('user-wins');
+        const totalRollsDisplay = document.getElementById('total-rolls');
+        const userResultBadge = document.getElementById('user-result-badge');
+        const historyLog = document.getElementById('history-log');
+        const frequencyChart = document.getElementById('frequency-chart');
+
+        // Initialize Frequency Chart
+        function initChart() {
+            frequencyChart.innerHTML = '';
+            for (let i = 1; i <= 6; i++) {
+                frequencyChart.innerHTML += `
+                <div class="d-flex align-items-center mb-1">
+                    <span style="width: 20px;">${i}</span>
+                    <div class="flex-grow-1 mx-2 stat-bar">
+                        <div class="stat-fill" id="bar-${i}"></div>
+                    </div>
+                    <span class="small text-muted" id="count-${i}">0</span>
+                </div>
+            `;
+            }
+        }
+        initChart();
+
+        // User Selection
+        function selectNumber(num) {
+            if (isRolling) return;
+            userSelection = num;
+
+            // Update UI
+            document.querySelectorAll('.btn-number').forEach(btn => {
+                btn.classList.remove('btn-warning', 'selected');
+                btn.classList.add('btn-outline-light');
+                if (parseInt(btn.innerText) === num) {
+                    btn.classList.remove('btn-outline-light');
+                    btn.classList.add('btn-warning', 'selected');
+                }
+            });
+
+            rollBtn.disabled = false;
+
+            // Reset badges
+            userResultBadge.className = 'badge bg-secondary';
+            userResultBadge.innerText = 'Ready';
+            aiResultBadge.className = 'badge bg-secondary';
+            aiResultBadge.innerText = 'Ready';
+        }
+
+        // Markov Chain Logic
+        function getAiPrediction() {
+            if (history.length === 0) return Math.floor(Math.random() * 6) + 1; // Random start
+
+            const lastRoll = history[history.length - 1];
+            const transitions = transitionMatrix[lastRoll];
+
+            if (!transitions) return Math.floor(Math.random() * 6) + 1; // No data yet
+
+            // Find most likely next roll
+            let bestNext = null;
+            let maxCount = -1;
+
+            // Simple greedy strategy: pick the one with highest historical frequency following the last number
+            // If tie, pick random among ties
+            let candidates = [];
+
+            for (let next in transitions) {
+                if (transitions[next] > maxCount) {
+                    maxCount = transitions[next];
+                    candidates = [parseInt(next)];
+                } else if (transitions[next] === maxCount) {
+                    candidates.push(parseInt(next));
+                }
+            }
+
+            if (candidates.length > 0) {
+                return candidates[Math.floor(Math.random() * candidates.length)];
+            }
+
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function updateMarkovModel(prev, current) {
+            if (!prev) return;
+
+            if (!transitionMatrix[prev]) {
+                transitionMatrix[prev] = {};
+            }
+            if (!transitionMatrix[prev][current]) {
+                transitionMatrix[prev][current] = 0;
+            }
+            transitionMatrix[prev][current]++;
+        }
+
+        // Dice Logic
+        function rollDice() {
+            if (isRolling || !userSelection) return;
+            isRolling = true;
+            rollBtn.disabled = true;
+
+            // AI Prediction happens BEFORE the roll result is known (simulated)
+            // But actually we predict based on PAST data.
+            const aiPrediction = getAiPrediction();
+            aiPredictionDisplay.innerText = aiPrediction;
+
+            // Determine Result
+            const result = Math.floor(Math.random() * 6) + 1;
+
+            // Animate
+            // We rotate the cube randomly a lot, then land on the specific rotation for the result
+            const xRand = Math.floor(Math.random() * 24) * 90; // multiple of 90
+            const yRand = Math.floor(Math.random() * 24) * 90;
+
+            // Calculate final rotation based on result class logic in CSS
+            // .show-1 { transform: translateZ(-50px) rotateY(0deg); }
+            // To animate smoothly, we need to append the final rotation to a large base rotation
+            // This is a simplified animation approach: just add class
+
+            // Actually, for smooth CSS transition from any state, we usually modify the transform style directly
+            // But here we used classes. Let's toggle classes.
+            // To make it look like it's spinning, we can set a temporary random transform
+
+            dice.style.transition = 'transform 1s ease-out';
+
+            // Random spin first
+            const randomRotX = (Math.floor(Math.random() * 4) + 5) * 360;
+            const randomRotY = (Math.floor(Math.random() * 4) + 5) * 360;
+
+            // Target rotations for each face to be front
+            // 1: 0, 0
+            // 2: 0, -90y
+            // 3: 0, -180y
+            // 4: 0, 90y
+            // 5: -90x, 0
+            // 6: 90x, 0
+
+            let finalX = 0;
+            let finalY = 0;
+
+            switch (result) {
+                case 1: finalX = 0; finalY = 0; break;
+                case 2: finalX = 0; finalY = -90; break;
+                case 3: finalX = 0; finalY = -180; break;
+                case 4: finalX = 0; finalY = 90; break;
+                case 5: finalX = -90; finalY = 0; break;
+                case 6: finalX = 90; finalY = 0; break;
+            }
+
+            // Add extra spins
+            dice.style.transform = `translateZ(-50px) rotateX(${finalX + 360 * 5}deg) rotateY(${finalY + 360 * 5}deg)`;
+
+            setTimeout(() => {
+                // Reset transform to the clean angle (modulo 360) so next spin works well? 
+                // Or just keep adding. For simplicity, we just leave it.
+                // If we want to re-roll, we might need to handle the accumulation.
+                // For this simple demo, let's just let it accumulate or reset.
+                // Actually, the class-based approach in CSS was:
+                // .cube.show-1 { transform: translateZ(-50px) rotateY(0deg); }
+                // If we override style, classes don't matter.
+
+                finishRoll(result, aiPrediction);
+            }, 1000);
+        }
+
+        function finishRoll(result, aiPrediction) {
+            isRolling = false;
+            rollBtn.disabled = false;
+
+            // Update Data
+            totalRolls++;
+            numberCounts[result]++;
+
+            // Update Markov
+            if (history.length > 0) {
+                updateMarkovModel(history[history.length - 1], result);
+            }
+            history.push(result);
+
+            // Check Wins
+            const userWon = (userSelection === result);
+            const aiWon = (aiPrediction === result);
+
+            if (userWon) userWins++;
+            if (aiWon) aiWins++;
+
+            // Update UI
+            updateStats(result, userWon, aiWon);
+        }
+
+        function updateStats(result, userWon, aiWon) {
+            // User Stats
+            userWinsDisplay.innerText = userWins;
+            totalRollsDisplay.innerText = totalRolls;
+            userAccuracyDisplay.innerText = Math.round((userWins / totalRolls) * 100) + '%';
+
+            if (userWon) {
+                userResultBadge.className = 'badge bg-success';
+                userResultBadge.innerText = 'WIN';
+            } else {
+                userResultBadge.className = 'badge bg-danger';
+                userResultBadge.innerText = 'LOSS';
+            }
+
+            // AI Stats
+            aiAccuracyDisplay.innerText = Math.round((aiWins / totalRolls) * 100) + '%';
+            if (aiWon) {
+                aiResultBadge.className = 'badge bg-success';
+                aiResultBadge.innerText = 'WIN';
+            } else {
+                aiResultBadge.className = 'badge bg-danger';
+                aiResultBadge.innerText = 'LOSS';
+            }
+
+            // Frequency Chart
+            const maxCount = Math.max(...Object.values(numberCounts), 1);
+            for (let i = 1; i <= 6; i++) {
+                const count = numberCounts[i];
+                const pct = (count / maxCount) * 100;
+                document.getElementById(`bar-${i}`).style.width = pct + '%';
+                document.getElementById(`count-${i}`).innerText = count;
+            }
+
+            // History Log
+            const dot = document.createElement('span');
+            dot.className = 'history-dot';
+            dot.style.backgroundColor = '#3498db'; // Neutral color
+            dot.title = result;
+            historyLog.appendChild(dot);
+            // Scroll to right
+            historyLog.scrollLeft = historyLog.scrollWidth;
+        }
+
+    </script>
+</body>
+
+</html>
