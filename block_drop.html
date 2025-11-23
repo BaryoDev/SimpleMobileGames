@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Block Drop - Classic Puzzle</title>
+    <link rel="stylesheet" href="css/dopamine-ui.css">
     <style>
         * {
             margin: 0;
@@ -488,6 +489,13 @@
                 dropInterval = Math.max(100, 1000 - (level - 1) * 50);
                 sound.clear();
                 updateUI();
+
+                // Reward System: Tetris (4 lines)
+                if (linesCleared >= 4 && window.rewardSystem) {
+                    gameUI.showNotification('TETRIS! +1200', 'legendary');
+                } else if (linesCleared >= 2 && window.rewardSystem) {
+                    gameUI.showNotification('Combo! +' + (linesCleared * 100), 'rare');
+                }
             }
         }
 
@@ -537,7 +545,23 @@
         function showGameOver() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalLines').textContent = lines;
-            document.getElementById('gameOver').style.display = 'block';
+            // document.getElementById('gameOver').style.display = 'block'; // Replaced by RewardSystem
+
+            if (window.rewardSystem) {
+                rewardSystem.recordGame('blockDrop', { score: score, lines: lines });
+
+                gameUI.showSummary({
+                    score: score,
+                    level: level,
+                    gameId: 'block_drop',
+                    metrics: {
+                        'Lines Cleared': lines,
+                        'Level Reached': level
+                    }
+                });
+            } else {
+                document.getElementById('gameOver').style.display = 'block';
+            }
         }
 
         function restart() {
@@ -611,6 +635,20 @@
         drawNext();
         requestAnimationFrame(gameLoop);
     </script>
+</body>
+
+<script src="js/data-service.js"></script>
+<script src="js/reward-system.js"></script>
+<script src="js/particle-system.js"></script>
+<script src="js/game-ui.js"></script>
+<script>
+    // Initialize Reward System
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.rewardSystem) {
+            rewardSystem.init();
+        }
+    });
+</script>
 </body>
 
 </html>

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dice Master - AI Prediction</title>
+    <link rel="stylesheet" href="css/dopamine-ui.css">
     <style>
         * {
             margin: 0;
@@ -507,6 +508,12 @@
         </div>
     </div>
 
+    <!-- Reward System Scripts -->
+    <script src="js/data-service.js"></script>
+    <script src="js/reward-system.js"></script>
+    <script src="js/particle-system.js"></script>
+    <script src="js/game-ui.js"></script>
+
     <script>
         // Game State
         let userSelection = null;
@@ -644,6 +651,44 @@
             if (aiWon) aiWins++;
 
             updateStats(userWon, aiWon);
+
+            // Dopamine triggers
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            if (userWon) {
+                particles.confetti(centerX, centerY, 30);
+                gameUI.showFloatingText('YOU WIN!', centerX, centerY - 50, '#ffd700', '36px');
+
+                // Win streak celebration
+                if (userWins % 3 === 0 && userWins > 0) {
+                    gameUI.showFloatingText(`${userWins} WIN STREAK!`, centerX, centerY + 50, '#ff6b00', '28px');
+                    particles.fire(centerX, centerY, 25);
+                }
+            } else if (aiWon) {
+                particles.sparkle(centerX, centerY, 10, '#60a5fa');
+            }
+
+            // Record game in reward system
+            (async () => {
+                try {
+                    await rewardSystem.recordGame('diceMaster', { won: userWon });
+                    const player = rewardSystem.player;
+                    const xpInfo = rewardSystem.getXPForNextLevel();
+                    gameUI.updateXP(player.xp, xpInfo.needed, xpInfo.total);
+                    gameUI.updateLevel(player.level);
+
+                    const unseenAchievements = rewardSystem.getUnseenAchievements();
+                    for (const achievement of unseenAchievements) {
+                        setTimeout(() => gameUI.showAchievement(achievement), 500);
+                    }
+                    if (unseenAchievements.length > 0) {
+                        await rewardSystem.markAchievementsSeen(unseenAchievements.map(a => a.id));
+                    }
+                } catch (error) {
+                    console.error('Error recording game:', error);
+                }
+            })();
         }
 
         function updateStats(userWon, aiWon) {
@@ -667,6 +712,23 @@
                 aiResultEl.innerText = 'LOSE';
             }
         }
+
+        // Initialize reward system
+        (async () => {
+            try {
+                await rewardSystem.init();
+                const player = rewardSystem.player;
+                const xpInfo = rewardSystem.getXPForNextLevel();
+                gameUI.updateXP(player.xp, xpInfo.needed, xpInfo.total);
+                gameUI.updateLevel(player.level);
+                gameUI.updateStreak(player.streak.current);
+                rewardSystem.on('level_up', (data) => {
+                    gameUI.showLevelUp(data.oldLevel, data.newLevel);
+                });
+            } catch (error) {
+                console.error('Failed to initialize reward system:', error);
+            }
+        })();
 
     </script>
 </body>

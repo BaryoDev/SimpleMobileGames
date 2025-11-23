@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chess Master - Learning AI</title>
+    <link rel="stylesheet" href="css/dopamine-ui.css">
     <style>
         * {
             margin: 0;
@@ -347,6 +348,13 @@
             }
         };
 
+        // Reward System Integration
+        function showReward(type, message) {
+            if (window.rewardSystem) {
+                gameUI.showNotification(message, type);
+            }
+        }
+
         document.getElementById('muteBtn').onclick = function () {
             sound.muted = !sound.muted;
             localStorage.setItem('gameSoundsMuted', sound.muted);
@@ -587,7 +595,12 @@
             }
 
             // Sound
-            if (captured !== ' ') sound.capture();
+            if (captured !== ' ') {
+                sound.capture();
+                // Reward for capturing major pieces
+                if (captured.toLowerCase() === 'q') showReward('legendary', 'Captured Queen! +900');
+                else if (captured.toLowerCase() === 'r') showReward('rare', 'Captured Rook! +500');
+            }
             else sound.move();
 
             // Check pawn promotion
@@ -828,6 +841,20 @@
             doCoinToss();
         };
     </script>
+</body>
+
+<script src="js/data-service.js"></script>
+<script src="js/reward-system.js"></script>
+<script src="js/particle-system.js"></script>
+<script src="js/game-ui.js"></script>
+<script>
+    // Initialize Reward System
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.rewardSystem) {
+            rewardSystem.init();
+        }
+    });
+</script>
 </body>
 
 </html>

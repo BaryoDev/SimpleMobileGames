@@ -59,6 +59,47 @@ You can deploy these games for free using **Surge.sh**, a simple CLI for static 
 - **Vanilla JavaScript**: Core game logic without external framework dependencies.
 - **Bootstrap 5**: For the main menu and responsive UI layout.
 
+## Development & Integration
+
+The project uses a modular structure for shared game systems.
+
+### File Structure
+- `js/`: Contains shared JavaScript modules.
+    - `reward-system.js`: Manages XP, levels, and achievements.
+    - `game-ui.js`: Handles UI overlays for rewards and notifications.
+    - `data-service.js`: Manages local storage persistence.
+    - `particle-system.js`: Visual effects for rewards.
+- `css/`: Contains shared styles.
+    - `dopamine-ui.css`: Styles for the reward system UI.
+
+### Integrating into a New Game
+To add the reward system to a new HTML game, include the following in your `<head>` and `<body>`:
+
+```html
+<head>
+    <!-- ... other tags ... -->
+    <link rel="stylesheet" href="css/dopamine-ui.css">
+</head>
+<body>
+    <!-- Game Canvas/Content -->
+
+    <!-- Shared Scripts -->
+    <script src="js/data-service.js"></script>
+    <script src="js/reward-system.js"></script>
+    <script src="js/particle-system.js"></script>
+    <script src="js/game-ui.js"></script>
+    
+    <script>
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.rewardSystem) {
+                rewardSystem.init();
+            }
+        });
+    </script>
+</body>
+```
+
 ## Credits
 
 These games were created using **Gemini 3 Pro** in the **AntiGravity IDE**.

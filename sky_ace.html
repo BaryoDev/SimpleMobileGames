@@ -7,6 +7,7 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sky Ace: Tactical Ops</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/dopamine-ui.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@600&family=Share+Tech+Mono&display=swap');
 
@@ -396,7 +397,7 @@
 
         let bullets = [];
         let enemies = [];
-        let particles = [];
+        let explosionParticles = [];
         let stars = [];
 
         // BG Stars
@@ -664,7 +665,7 @@
             enemies.forEach(e => {
                 e.dead = true;
                 // Explosion particles
-                for (let i = 0; i < 10; i++) particles.push({ x: e.x, y: e.y, color: e.color, vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10, life: 1 });
+                for (let i = 0; i < 10; i++) explosionParticles.push({ x: e.x, y: e.y, color: e.color, vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10, life: 1 });
             });
             bullets = []; // Clear threat
             score += 500;
@@ -691,7 +692,7 @@
                         player.hp -= 10; b.dead = true;
                         sound.hit();
                         // Hit effect
-                        for (let i = 0; i < 5; i++) particles.push({ x: player.x, y: player.y, color: 'red', vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10, life: 1 });
+                        for (let i = 0; i < 5; i++) explosionParticles.push({ x: player.x, y: player.y, color: 'red', vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10, life: 1 });
                     }
                 } else {
                     enemies.forEach(e => {
@@ -703,7 +704,7 @@
                                 score += (e.type === 'COMMANDER' ? 500 : 100);
 
                                 // Particles
-                                for (let i = 0; i < 8; i++) particles.push({ x: e.x, y: e.y, color: e.color, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8, life: 1 });
+                                for (let i = 0; i < 8; i++) explosionParticles.push({ x: e.x, y: e.y, color: e.color, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8, life: 1 });
 
                                 // Loot
                                 if (e.type === 'UPGRADE') {
@@ -729,7 +730,7 @@
                 const dist = Math.hypot(e.x - player.x, e.y - player.y);
                 if (dist < (e.w / 2 + player.w / 2)) {
                     e.dead = true; player.hp -= 20;
-                    for (let i = 0; i < 10; i++) particles.push({ x: player.x, y: player.y, color: 'red', vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, life: 1 });
+                    for (let i = 0; i < 10; i++) explosionParticles.push({ x: player.x, y: player.y, color: 'red', vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, life: 1 });
                 }
             });
 
@@ -740,7 +741,7 @@
         function resetGame() {
             player.hp = 100; player.x = SCREEN_W / 2; player.y = SCREEN_H - 150;
             player.weaponLevel = 1; player.bombs = 1; // Start with 1 bomb
-            score = 0; bullets = []; enemies = []; particles = [];
+            score = 0; bullets = []; enemies = []; explosionParticles = [];
             AI.playerPosHistory = []; AI.aggression = 1;
             floatLayer.innerHTML = '';
             updateHUD();
@@ -751,7 +752,24 @@
             sound.over();
             document.getElementById('finalScore').innerText = score;
             document.getElementById('ui-layer').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.remove('hidden');
+            // document.getElementById('gameOverScreen').classList.remove('hidden'); // Replaced by RewardSystem
+
+            // Trigger Reward System
+            if (window.rewardSystem) {
+                rewardSystem.recordGame('skyAce', { score: score, kills: Math.floor(score / 100) });
+
+                gameUI.showSummary({
+                    score: score,
+                    level: Math.floor(score / 1000) + 1,
+                    gameId: 'sky_ace',
+                    metrics: {
+                        'Enemies Defeated': Math.floor(score / 100),
+                        'Weapon Level': player.weaponLevel
+                    }
+                });
+            } else {
+                document.getElementById('gameOverScreen').classList.remove('hidden');
+            }
         }
 
         // Delta time for frame-rate independence
@@ -822,11 +840,11 @@
                 enemies.forEach(e => { e.update(deltaMultiplier); e.draw(); });
 
                 // Particles
-                particles.forEach((p, i) => {
-                    p.x += p.vx * deltaMultiplier; p.y += p.vy * deltaMultiplier; p.life -= 0.05 * deltaMultiplier;
-                    ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life);
+                explosionParticles.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy; p.life -= 0.05;
+                    ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
                     ctx.fillRect(p.x, p.y, 4, 4);
-                    if (p.life <= 0) particles.splice(i, 1);
+                    if (p.life <= 0) explosionParticles.splice(i, 1);
                 });
                 ctx.globalAlpha = 1;
 
@@ -932,6 +950,18 @@
 
         gameLoop();
 
+    </script>
+    <script src="js/data-service.js"></script>
+    <script src="js/reward-system.js"></script>
+    <script src="js/particle-system.js"></script>
+    <script src="js/game-ui.js"></script>
+    <script>
+        // Initialize Reward System
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.rewardSystem) {
+                rewardSystem.init();
+            }
+        });
     </script>
 </body>
 

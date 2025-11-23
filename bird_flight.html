@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bird Flight - Local Rankings</title>
+    <link rel="stylesheet" href="css/dopamine-ui.css">
     <style>
         body {
             margin: 0;
@@ -200,10 +201,10 @@
 </head>
 
 <body>
+    <canvas id="gameCanvas"></canvas>
+
     <a href="index.html" class="back-btn">← Back</a>
     <button class="mute-btn" id="muteBtn" title="Toggle Sound">🔊</button>
-
-    <canvas id="gameCanvas"></canvas>
 
     <div id="ui-layer">
         <div id="score" class="score-display">0</div>
@@ -240,6 +241,12 @@
             <button class="btn" id="restart-btn">Try Again</button>
         </div>
     </div>
+
+    <!-- Reward System Scripts -->
+    <script src="js/data-service.js"></script>
+    <script src="js/reward-system.js"></script>
+    <script src="js/particle-system.js"></script>
+    <script src="js/game-ui.js"></script>
 
     <script>
         // Sound Generator
@@ -638,6 +645,16 @@
                     if (birdRight > pipeLeft && birdLeft < pipeRight) {
                         if (birdTop < topPipeBottom || birdBottom > bottomPipeTop) {
                             gameOver();
+                        } else {
+                            // Near-miss detection (dopamine trigger)
+                            const topDistance = birdTop - topPipeBottom;
+                            const bottomDistance = bottomPipeTop - birdBottom;
+                            const minDistance = Math.min(Math.abs(topDistance), Math.abs(bottomDistance));
+
+                            if (minDistance < 30 && !p.nearMissTriggered) {
+                                p.nearMissTriggered = true;
+                                gameUI.showNearMiss(bird.x, bird.y);
+                            }
                         }
                     }
 
@@ -646,6 +663,34 @@
                         p.passed = true;
                         scoreEl.innerText = score;
                         sound.playScore();
+
+                        // Dopamine triggers for scoring
+                        particles.sparkle(bird.x, bird.y, 10, '#ffd700');
+
+                        // Milestone celebrations
+                        const centerX = canvas.width / 2;
+                        const centerY = canvas.height / 3;
+
+                        if (score === 1) {
+                            gameUI.showFloatingText('FIRST POINT!', centerX, centerY, '#4facfe', '24px');
+                        } else if (score === 5) {
+                            gameUI.showFloatingText('GETTING GOOD!', centerX, centerY, '#45b7d1', '28px');
+                            particles.sparkle(centerX, centerY, 20, '#45b7d1');
+                        } else if (score === 10) {
+                            gameUI.showFloatingText('GREAT START!', centerX, centerY, '#ffd700', '32px');
+                            particles.confetti(centerX, centerY, 30);
+                        } else if (score === 20) {
+                            gameUI.showFloatingText('ON FIRE!', centerX, centerY, '#ff6b00', '36px');
+                            particles.fire(centerX, centerY, 25);
+                        } else if (score === 30) {
+                            gameUI.showFloatingText('UNSTOPPABLE!', centerX, centerY, '#ff4400', '40px');
+                            particles.confetti(centerX, centerY, 50);
+                            particles.fire(centerX, centerY, 30);
+                        } else if (score === 50) {
+                            gameUI.showFloatingText('LEGENDARY!', centerX, centerY, '#ffd700', '48px');
+                            particles.starBurst(centerX, centerY, 12);
+                            particles.confetti(centerX, centerY, 60);
+                        }
                     }
 
                     if (p.x + this.w <= 0) {
@@ -734,6 +779,32 @@
 
             scoreEl.style.display = 'none';
             gameOverScreen.style.display = 'flex';
+
+            // Record game in reward system (async)
+            (async () => {
+                try {
+                    await rewardSystem.recordGame('birdFlight', { score });
+
+                    // Update UI with new XP/level
+                    const player = rewardSystem.player;
+                    const xpInfo = rewardSystem.getXPForNextLevel();
+                    gameUI.updateXP(player.xp, xpInfo.needed, xpInfo.total);
+                    gameUI.updateLevel(player.level);
+
+                    // Show any new achievements
+                    const unseenAchievements = rewardSystem.getUnseenAchievements();
+                    for (const achievement of unseenAchievements) {
+                        setTimeout(() => {
+                            gameUI.showAchievement(achievement);
+                        }, 500);
+                    }
+                    if (unseenAchievements.length > 0) {
+                        await rewardSystem.markAchievementsSeen(unseenAchievements.map(a => a.id));
+                    }
+                } catch (error) {
+                    console.error('Error recording game:', error);
+                }
+            })();
         }
 
         // --- Input Handling ---
@@ -783,6 +854,28 @@
 
         // Init
         initClouds();
+
+        // Initialize reward system
+        (async () => {
+            try {
+                await rewardSystem.init();
+                const player = rewardSystem.player;
+
+                // Update UI with player stats
+                const xpInfo = rewardSystem.getXPForNextLevel();
+                gameUI.updateXP(player.xp, xpInfo.needed, xpInfo.total);
+                gameUI.updateLevel(player.level);
+                gameUI.updateStreak(player.streak.current);
+
+                // Listen for reward events
+                rewardSystem.on('level_up', (data) => {
+                    gameUI.showLevelUp(data.oldLevel, data.newLevel);
+                });
+            } catch (error) {
+                console.error('Failed to initialize reward system:', error);
+            }
+        })();
+
         loop();
 
     </script>

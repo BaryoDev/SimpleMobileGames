@@ -1,5 +1,9 @@
 node_modules/
-android/
+# Android
+android/build/
+android/.gradle/
+android/app/build/
+android/app/src/main/assets/public/
 www/
 capacitor.config.json
 package-lock.json
@@ -26,3 +30,8 @@ local.properties
 # Test output
 test-results/
 playwright-report/
+
+# DopamineJS
+dopaminejs/node_modules/
+dopaminejs/dist/
+*.tgz
