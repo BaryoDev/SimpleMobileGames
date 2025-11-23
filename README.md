@@ -10,14 +10,15 @@ A clone of the popular tapping game. Navigate the bird through the pipes by clic
 
 ### 2. Sky Ace (Sonic Wings Clone)
 A vertical scrolling shooter inspired by classic arcade games like Sonic Wings / Aero Fighters.
-- **Controls**: 
-    - **Arrow Keys**: Move the ship.
+- **Controls**:
+    - **Arrow Keys**: Move the ship horizontally.
     - **Space**: Shoot.
-- **Features**:
-    - Smooth player movement and shooting mechanics.
-    - Enemy spawns and combat.
-    - Score tracking and lives system.
-    - Custom Canvas-drawn graphics.
+- **Objective**: Survive as long as possible while destroying enemy ships and accumulating score.
+- **Scoring**: Earn points for each enemy destroyed; higher‑level enemies give more points.
+- **Power‑ups**:
+    - **EMP Bomb** (available after destroying certain enemies): Press the EMP button to clear all enemies on screen.
+    - **Weapon Upgrades**: Collect upgrade drops to increase firepower.
+    - **Health Packs**: Restore ship integrity.
 
 ### 3. Dice Master
 A prediction game where you compete against a Markov Chain AI.
