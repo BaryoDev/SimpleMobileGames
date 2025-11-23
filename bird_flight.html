@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flappy Bird - Local Rankings</title>
+    <title>Bird Flight - Local Rankings</title>
     <style>
         body {
             margin: 0;
@@ -153,10 +153,55 @@
             font-size: 0.9rem;
             color: #666;
         }
+
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #543847;
+            border-radius: 8px;
+            color: #543847;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: #543847;
+            color: white;
+        }
+
+        .mute-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #543847;
+            border-radius: 8px;
+            color: #543847;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 100;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .mute-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 
 <body>
+    <a href="index.html" class="back-btn">← Back</a>
+    <button class="mute-btn" id="muteBtn" title="Toggle Sound">🔊</button>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -165,7 +210,7 @@
 
         <!-- Start Screen -->
         <div id="start-screen" class="message-box" style="display: flex;">
-            <h1>Flappy Bird</h1>
+            <h1>Bird Flight</h1>
             <p>Enter your name:</p>
             <input type="text" id="player-name-input" placeholder="PLAYER 1" maxlength="8" autocomplete="off">
             <button class="btn" id="start-btn">Play</button>
@@ -197,6 +242,59 @@
     </div>
 
     <script>
+        // Sound Generator
+        class SoundGenerator {
+            constructor() {
+                this.audioContext = null;
+                this.muted = localStorage.getItem('gameSoundsMuted') === 'true';
+            }
+            initAudio() {
+                if (!this.audioContext) {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            toggleMute() {
+                this.muted = !this.muted;
+                localStorage.setItem('gameSoundsMuted', this.muted);
+                return this.muted;
+            }
+            playTone(frequency, duration, type = 'sine', volume = 0.3) {
+                if (this.muted) return;
+                this.initAudio();
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+            playJump() {
+                this.playTone(400, 0.1, 'square', 0.2);
+            }
+            playScore() {
+                this.playTone(800, 0.15, 'sine', 0.25);
+                setTimeout(() => this.playTone(1000, 0.15, 'sine', 0.25), 50);
+            }
+            playGameOver() {
+                this.playTone(300, 0.2, 'sawtooth', 0.3);
+                setTimeout(() => this.playTone(200, 0.2, 'sawtooth', 0.3), 100);
+                setTimeout(() => this.playTone(150, 0.3, 'sawtooth', 0.3), 200);
+            }
+        }
+
+        const sound = new SoundGenerator();
+
+        // Mute button
+        const muteBtn = document.getElementById('muteBtn');
+        muteBtn.innerText = sound.muted ? '🔇' : '🔊';
+        muteBtn.addEventListener('click', () => {
+            const muted = sound.toggleMute();
+            muteBtn.innerText = muted ? '🔇' : '🔊';
+        });
 
         /**
          * Game Logic
@@ -250,7 +348,7 @@
 
         // --- Leaderboard Logic (LocalStorage) ---
 
-        const LEADERBOARD_KEY = 'flappyLeaderboard_v1';
+        const LEADERBOARD_KEY = 'birdFlightLeaderboard_v1';
 
         function saveScore(name, points) {
             // 1. Get existing data
@@ -350,13 +448,13 @@
             }
         }
 
-        function drawBackground() {
+        function drawBackground(deltaMultiplier = 1) {
             ctx.fillStyle = colors.sky;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = colors.cloud;
             clouds.forEach(c => {
-                c.x -= c.s;
+                c.x -= c.s * deltaMultiplier;
                 if (c.x + c.w < 0) c.x = canvas.width + c.w;
 
                 ctx.beginPath();
@@ -447,9 +545,9 @@
                 ctx.restore();
             },
 
-            update: function () {
-                this.velocity += this.gravity;
-                this.y += this.velocity;
+            update: function (deltaMultiplier = 1) {
+                this.velocity += this.gravity * deltaMultiplier;
+                this.y += this.velocity * deltaMultiplier;
 
                 // Floor collision
                 if (this.y + this.radius >= canvas.height - 100) {
@@ -466,6 +564,7 @@
 
             flap: function () {
                 this.velocity = this.jump;
+                sound.playJump();
             },
 
             reset: function () {
@@ -506,7 +605,7 @@
                 }
             },
 
-            update: function () {
+            update: function (deltaMultiplier = 1) {
                 const currentSpawnRate = Math.floor(300 / this.dx);
 
                 if (frames % currentSpawnRate === 0) {
@@ -523,7 +622,7 @@
 
                 for (let i = 0; i < this.position.length; i++) {
                     let p = this.position[i];
-                    p.x -= this.dx;
+                    p.x -= this.dx * deltaMultiplier;
 
                     // Collision detection
                     const birdLeft = bird.x - bird.radius + 4;
@@ -546,6 +645,7 @@
                         score++;
                         p.passed = true;
                         scoreEl.innerText = score;
+                        sound.playScore();
                     }
 
                     if (p.x + this.w <= 0) {
@@ -562,12 +662,21 @@
         };
 
 
-        // --- Game Loop ---
+        // --- Game Loop with Delta Time ---
 
-        function update() {
+        let lastTime = 0;
+        const TARGET_FPS = 60;
+        const FRAME_DURATION = 1000 / TARGET_FPS; // ~16.67ms for 60 FPS
+
+        let currentDeltaMultiplier = 1;
+
+        function update(deltaTime) {
+            // Normalize deltaTime to 60 FPS (1.0 = perfect 60 FPS timing)
+            currentDeltaMultiplier = deltaTime / FRAME_DURATION;
+
             if (currentState === STATE.PLAYING) {
-                bird.update();
-                pipes.update();
+                bird.update(currentDeltaMultiplier);
+                pipes.update(currentDeltaMultiplier);
             } else if (currentState === STATE.START) {
                 bird.y = canvas.height / 2 + Math.sin(frames * 0.1) * 5;
                 bird.x = canvas.width / 2;
@@ -577,13 +686,20 @@
         }
 
         function draw() {
-            drawBackground();
+            drawBackground(currentDeltaMultiplier);
             pipes.draw();
             bird.draw();
         }
 
-        function loop() {
-            update();
+        function loop(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            // Only update if we have a valid deltaTime (skip first frame)
+            if (deltaTime > 0 && deltaTime < 100) { // Cap at 100ms to prevent huge jumps
+                update(deltaTime);
+            }
+
             draw();
             requestAnimationFrame(loop);
         }
@@ -608,6 +724,7 @@
         function gameOver() {
             if (currentState === STATE.GAMEOVER) return; // Prevent double trigger
             currentState = STATE.GAMEOVER;
+            sound.playGameOver();
 
             finalScoreEl.innerText = score;
 

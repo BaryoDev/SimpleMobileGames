@@ -1,0 +1,31 @@
+{
+  "name": "htmlgames",
+  "version": "1.0.0",
+  "description": "A collection of browser-based games built with HTML5, CSS, and JavaScript. This project serves as a playground for experimenting with game development using standard web technologies.",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:build": "playwright test && echo '✅ All tests passed!'",
+    "build": "npm run test:build && npx cap sync && cd android && export JAVA_HOME=$(/usr/libexec/java_home -v 21) && ./gradlew assembleDebug",
+    "deploy": "npm run build && ~/Library/Android/sdk/platform-tools/adb -s R3CT50BYRVY install -r android/app/build/outputs/apk/debug/app-debug.apk && ~/Library/Android/sdk/platform-tools/adb -s R3CT50BYRVY shell am start -n com.example.htmlgames/.MainActivity"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BaryoDev/SimpleMobileGames.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BaryoDev/SimpleMobileGames/issues"
+  },
+  "homepage": "https://github.com/BaryoDev/SimpleMobileGames#readme",
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

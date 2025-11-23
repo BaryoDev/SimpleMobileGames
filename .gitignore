@@ -1,0 +1,28 @@
+node_modules/
+android/
+www/
+capacitor.config.json
+package-lock.json
+.DS_Store
+
+# Sensitive files - Never commit these!
+*.keystore
+*.jks
+*.p12
+*.pem
+keystore.properties
+local.properties
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Test output
+test-results/
+playwright-report/

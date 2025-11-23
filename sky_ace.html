@@ -184,10 +184,49 @@
             z-index: 30;
             transition: opacity 0.1s;
         }
+
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 15px;
+            background: rgba(37, 99, 235, 0.9);
+            border: 1px solid #60a5fa;
+            border-radius: 4px;
+            color: #e0f2fe;
+            text-decoration: none;
+            font-family: 'Black Ops One', cursive;
+            font-size: 0.8rem;
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mute-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: rgba(37, 99, 235, 0.9);
+            border: 1px solid #60a5fa;
+            border-radius: 4px;
+            color: #e0f2fe;
+            font-family: 'Black Ops One', cursive;
+            font-size: 1.2rem;
+            z-index: 100;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+        }
     </style>
 </head>
 
 <body>
+    <a href="index.html" class="back-btn">← BACK</a>
+    <button class="mute-btn" id="muteBtn" title="Toggle Sound">🔊</button>
 
     <canvas id="gameCanvas"></canvas>
     <div id="flash"></div>
@@ -276,6 +315,48 @@
         let frameCount = 0;
         let score = 0;
 
+        // Sound System
+        const sound = {
+            ctx: null,
+            muted: localStorage.getItem('gameSoundsMuted') === 'true',
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            play(freq, dur, type = 'sine', vol = 0.15) {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = type;
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                osc.start();
+                osc.stop(this.ctx.currentTime + dur);
+            },
+            shoot: function () { this.play(1200, 0.05, 'square', 0.1); },
+            explode: function () {
+                this.play(200, 0.15, 'sawtooth', 0.2);
+                setTimeout(() => this.play(150, 0.15, 'sawtooth', 0.2), 50);
+            },
+            hit: function () { this.play(300, 0.1, 'square', 0.15); },
+            powerup: function () {
+                this.play(523, 0.1, 'sine', 0.2);
+                setTimeout(() => this.play(659, 0.1, 'sine', 0.2), 100);
+            },
+            over: function () {
+                this.play(400, 0.2, 'sawtooth', 0.3);
+                setTimeout(() => this.play(300, 0.2, 'sawtooth', 0.3), 100);
+                setTimeout(() => this.play(200, 0.3, 'sawtooth', 0.3), 200);
+            }
+        };
+        document.getElementById('muteBtn').onclick = function () {
+            sound.muted = !sound.muted;
+            localStorage.setItem('gameSoundsMuted', sound.muted);
+            this.innerText = sound.muted ? '🔇' : '🔊';
+        };
+        document.getElementById('muteBtn').innerText = sound.muted ? '🔇' : '🔊';
+
         // --- TACTICAL AI MEMORY ---
         const AI = {
             playerPosHistory: [], // Track where player hangs out
@@ -307,9 +388,10 @@
 
         // --- ENTITIES ---
         const player = {
-            x: SCREEN_W / 2, y: SCREEN_H - 150, w: 40, h: 50,
+            x: SCREEN_W / 2, y: SCREEN_H - 150, w: 50, h: 60,
             hp: 100, weaponLevel: 1, bombs: 0,
-            vx: 0, vy: 0 // For predictive AI
+            vx: 0, vy: 0, // For predictive AI
+            color: '#38bdf8' // Cyan blue for player jet
         };
 
         let bullets = [];
@@ -335,8 +417,8 @@
                 this.color = isEnemy ? '#ef4444' : '#67e8f9';
                 this.dead = false;
             }
-            update() {
-                this.x += this.vx; this.y += this.vy;
+            update(deltaMultiplier = 1) {
+                this.x += this.vx * deltaMultiplier; this.y += this.vy * deltaMultiplier;
                 if (this.y < -50 || this.y > SCREEN_H + 50 || this.x < -50 || this.x > SCREEN_W + 50) this.dead = true;
             }
             draw() {
@@ -441,24 +523,24 @@
                 return { vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed };
             }
 
-            update() {
+            update(deltaMultiplier = 1) {
                 this.scanForThreats();
 
-                this.x += this.vx;
-                this.y += this.vy;
+                this.x += this.vx * deltaMultiplier;
+                this.y += this.vy * deltaMultiplier;
 
                 // Specific Behaviors
                 if (this.type === 'KAMIKAZE') {
                     // Seek player X aggressively
-                    if (player.x > this.x) this.x += 1.5;
-                    else this.x -= 1.5;
+                    if (player.x > this.x) this.x += 1.5 * deltaMultiplier;
+                    else this.x -= 1.5 * deltaMultiplier;
                 }
 
                 // Bounce walls
                 if (this.x < this.w / 2 || this.x > SCREEN_W - this.w / 2) this.vx *= -1;
 
                 // Shooting Logic
-                this.cooldown--;
+                this.cooldown -= deltaMultiplier;
                 if (this.cooldown <= 0) {
                     const gunY = this.y + this.h / 2;
 
@@ -607,6 +689,7 @@
                 if (b.isEnemy) {
                     if (Math.abs(b.x - player.x) < player.w / 2 && Math.abs(b.y - player.y) < player.h / 2) {
                         player.hp -= 10; b.dead = true;
+                        sound.hit();
                         // Hit effect
                         for (let i = 0; i < 5; i++) particles.push({ x: player.x, y: player.y, color: 'red', vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10, life: 1 });
                     }
@@ -624,13 +707,16 @@
 
                                 // Loot
                                 if (e.type === 'UPGRADE') {
-                                    if (player.weaponLevel < 5) { player.weaponLevel++; showFloatText("WEAPON UP", e.x, e.y, '#f97316'); }
+                                    if (player.weaponLevel < 5) { player.weaponLevel++; showFloatText("WEAPON UP", e.x, e.y, '#f97316'); sound.powerup(); }
                                     else { score += 1000; showFloatText("MAX BONUS", e.x, e.y, '#fff'); }
                                 } else if (e.type === 'SUPPLY') {
-                                    player.hp = Math.min(100, player.hp + 25); showFloatText("REPAIR", e.x, e.y, '#eab308');
+                                    player.hp = Math.min(100, player.hp + 25); showFloatText("REPAIR", e.x, e.y, '#eab308'); sound.powerup();
                                 } else if (e.type === 'KAMIKAZE') {
                                     player.bombs++; showFloatText("+1 EMP", e.x, e.y, '#ef4444');
                                 }
+                                sound.explode();
+                            } else {
+                                sound.hit();
                             }
                         }
                     });
@@ -662,12 +748,22 @@
 
         function endGame() {
             currentState = STATE.GAMEOVER;
+            sound.over();
             document.getElementById('finalScore').innerText = score;
             document.getElementById('ui-layer').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.remove('hidden');
         }
 
-        function gameLoop() {
+        // Delta time for frame-rate independence
+        let lastTime = 0;
+        const TARGET_FPS = 60;
+        const FRAME_DURATION = 1000 / TARGET_FPS;
+
+        function gameLoop(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            const deltaMultiplier = (deltaTime > 0 && deltaTime < 100) ? deltaTime / FRAME_DURATION : 1;
+
             // Draw BG
             ctx.fillStyle = '#020617';
             ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
@@ -675,7 +771,7 @@
             // Stars (Parallax)
             ctx.fillStyle = '#fff';
             stars.forEach(s => {
-                s.y += s.z;
+                s.y += s.z * deltaMultiplier;
                 if (s.y > SCREEN_H) { s.y = 0; s.x = Math.random() * SCREEN_W; }
                 ctx.globalAlpha = s.z / 3;
                 ctx.fillRect(s.x, s.y, s.z, s.z);
@@ -691,8 +787,8 @@
                 let oldY = player.y;
 
                 if (input.active) {
-                    player.x += (input.x - player.x) * 0.15;
-                    player.y += (input.y - player.y) * 0.15;
+                    player.x += (input.x - player.x) * 0.15 * deltaMultiplier;
+                    player.y += (input.y - player.y) * 0.15 * deltaMultiplier;
                 }
 
                 player.vx = player.x - oldX;
@@ -716,17 +812,18 @@
                             bullets.push(new Bullet(x + 25, y + 10, false, 4));
                         }
                     }
+                    sound.shoot();
                 }
 
                 spawnLogic();
 
                 // Update & Draw
-                bullets.forEach(b => { b.update(); b.draw(); });
-                enemies.forEach(e => { e.update(); e.draw(); });
+                bullets.forEach(b => { b.update(deltaMultiplier); b.draw(); });
+                enemies.forEach(e => { e.update(deltaMultiplier); e.draw(); });
 
                 // Particles
                 particles.forEach((p, i) => {
-                    p.x += p.vx; p.y += p.vy; p.life -= 0.05;
+                    p.x += p.vx * deltaMultiplier; p.y += p.vy * deltaMultiplier; p.life -= 0.05 * deltaMultiplier;
                     ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life);
                     ctx.fillRect(p.x, p.y, 4, 4);
                     if (p.life <= 0) particles.splice(i, 1);
@@ -735,17 +832,81 @@
 
                 checkCollisions();
 
-                // Player Draw
+                // Player Draw - Realistic Jet Fighter
+                ctx.save();
+                ctx.translate(player.x, player.y);
+
+                // Main Fuselage (body)
                 ctx.fillStyle = player.color;
                 ctx.beginPath();
-                ctx.moveTo(player.x, player.y - 30);
-                ctx.lineTo(player.x + 20, player.y + 20);
-                ctx.lineTo(player.x, player.y + 10);
-                ctx.lineTo(player.x - 20, player.y + 20);
+                ctx.moveTo(0, -30); // Nose
+                ctx.lineTo(8, -10);
+                ctx.lineTo(8, 20);
+                ctx.lineTo(0, 25); // Tail
+                ctx.lineTo(-8, 20);
+                ctx.lineTo(-8, -10);
+                ctx.closePath();
                 ctx.fill();
-                // Engine
-                ctx.fillStyle = `rgba(103, 232, 249, ${Math.random()})`;
-                ctx.fillRect(player.x - 4, player.y + 15, 8, 15 + Math.random() * 10);
+                ctx.strokeStyle = '#1e40af';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Cockpit
+                ctx.fillStyle = '#0c4a6e';
+                ctx.beginPath();
+                ctx.arc(0, -20, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#60a5fa';
+                ctx.stroke();
+
+                // Wings (delta wing style)
+                ctx.fillStyle = '#0284c7';
+                // Left wing
+                ctx.beginPath();
+                ctx.moveTo(-8, -5);
+                ctx.lineTo(-25, 10);
+                ctx.lineTo(-20, 15);
+                ctx.lineTo(-8, 10);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                // Right wing
+                ctx.beginPath();
+                ctx.moveTo(8, -5);
+                ctx.lineTo(25, 10);
+                ctx.lineTo(20, 15);
+                ctx.lineTo(8, 10);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Tail fins
+                ctx.fillStyle = '#0369a1';
+                // Left tail
+                ctx.beginPath();
+                ctx.moveTo(-4, 20);
+                ctx.lineTo(-10, 30);
+                ctx.lineTo(-6, 30);
+                ctx.lineTo(-4, 25);
+                ctx.closePath();
+                ctx.fill();
+                // Right tail
+                ctx.beginPath();
+                ctx.moveTo(4, 20);
+                ctx.lineTo(10, 30);
+                ctx.lineTo(6, 30);
+                ctx.lineTo(4, 25);
+                ctx.closePath();
+                ctx.fill();
+
+                // Engine glow (animated)
+                const glowIntensity = 0.6 + Math.random() * 0.4;
+                ctx.fillStyle = `rgba(251, 191, 36, ${glowIntensity})`;
+                ctx.beginPath();
+                ctx.ellipse(0, 28, 4, 8 + Math.random() * 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
 
                 // Cleanup
                 bullets = bullets.filter(b => !b.dead);

@@ -3,102 +3,421 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Games</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Game Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --tertiary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+
+            25% {
+                transform: translateY(-100px) translateX(50px);
+            }
+
+            50% {
+                transform: translateY(-200px) translateX(-50px);
+            }
+
+            75% {
+                transform: translateY(-100px) translateX(100px);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: var(--primary-gradient);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 400;
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
         .game-card {
-            transition: transform 0.2s;
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 24px;
             cursor: pointer;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: white;
+            display: block;
         }
 
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .header-title {
-            font-weight: 300;
-            letter-spacing: 2px;
+        .game-card:hover::before,
+        .game-card:active::before {
+            opacity: 1;
+        }
+
+        .game-card:hover,
+        .game-card:active {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .game-card-inner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .game-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-card:nth-child(1) .game-icon {
+            background: var(--primary-gradient);
+        }
+
+        .game-card:nth-child(2) .game-icon {
+            background: var(--secondary-gradient);
+        }
+
+        .game-card:nth-child(3) .game-icon {
+            background: var(--tertiary-gradient);
+        }
+
+        .game-info {
+            flex: 1;
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+
+        .game-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.4;
+        }
+
+        .game-arrow {
+            width: 24px;
+            height: 24px;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .game-card:hover .game-arrow,
+        .game-card:active .game-arrow {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .title {
+                font-size: 28px;
+            }
+
+            .game-card {
+                padding: 20px;
+            }
+
+            .game-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 28px;
+            }
+
+            .game-title {
+                font-size: 18px;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-card {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .game-card:nth-child(1) {
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .game-card:nth-child(2) {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .game-card:nth-child(3) {
+            animation-delay: 0.3s;
+            opacity: 0;
         }
     </style>
 </head>
 
 <body>
-    <div class="container py-5">
-        <header class="text-center mb-5">
-            <h1 class="display-4 header-title mb-3">HTML Games</h1>
-            <p class="lead text-muted">A collection of simple HTML5 games</p>
-        </header>
-
-        <div class="row g-4 justify-content-center">
-            <!-- Flappy Bird Card -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm game-card" onclick="window.location.href='flappybird.html'">
-                    <div class="card-body text-center p-5">
-                        <div class="mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
-                                class="bi bi-controller text-primary" viewBox="0 0 16 16">
-                                <path
-                                    d="M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0zm-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1v-1z" />
-                                <path
-                                    d="M3.051 3.26a.5.5 0 0 1 .354-.613l1.932-.518a.5.5 0 0 1 .62.39c.655-.079 1.35-.117 2.043-.117.72 0 1.443.041 2.12.126a.5.5 0 0 1 .622-.399l1.932.518a.5.5 0 0 1 .354.614c-2.434.729-5.105.729-7.539 0zm9.316 3.673a1 1 0 0 1 1-1h.002a1 1 0 0 1 1 1c0 .226-.053.449-.158.668a9.81 9.81 0 0 1-.301.581c-.389.71-.94 1.536-1.84 2.433-.806.806-1.78 1.38-2.875 1.702-.05.015-.1.028-.149.041-.26.068-.524.123-.79.164a12.14 12.14 0 0 1-1.483.093 12.15 12.15 0 0 1-1.482-.093c-.266-.04-.53-.096-.79-.164a5.8 5.8 0 0 1-.149-.041c-1.095-.322-2.069-.896-2.875-1.702-.9-.897-1.451-1.723-1.84-2.433a9.81 9.81 0 0 1-.301-.581c-.105-.219-.158-.442-.158-.668a1 1 0 0 1 1-1h.002a1 1 0 0 1 1 1c0 .276.06.531.169.773.012.027.025.053.037.08a8.53 8.53 0 0 0 .17.374c.308.615.773 1.295 1.508 2.03.74.74 1.55 1.175 2.4 1.418.06.017.12.033.18.048.36.094.732.166 1.11.216a11.14 11.14 0 0 0 1.11.058c.375 0 .748-.02 1.11-.058.378-.05.75-.122 1.109-.216.06-.015.12-.031.18-.048.85-.243 1.66-.678 2.4-1.418.735-.735 1.2-1.415 1.508-2.03.054-.118.111-.244.17-.374.012-.027.025-.053.037-.08.109-.242.169-.497.169-.773z" />
-                            </svg>
-                        </div>
-                        <h5 class="card-title">Flappy Bird</h5>
-                        <p class="card-text text-muted small">Navigate the bird through the pipes!</p>
-                        <a href="flappybird.html" class="btn btn-outline-primary mt-3">Play Now</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dice Master Card -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm game-card" onclick="window.location.href='dice_game.html'">
-                    <div class="card-body text-center p-5">
-                        <div class="mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
-                                class="bi bi-dice-5 text-warning" viewBox="0 0 16 16">
-                                <path
-                                    d="M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h10zM3 0a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3H3z" />
-                                <path
-                                    d="M5.5 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm8 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-8 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm4-4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
-                            </svg>
-                        </div>
-                        <h5 class="card-title">Dice Master</h5>
-                        <p class="card-text text-muted small">Predict the roll against a Markov Chain AI!</p>
-                        <a href="dice_game.html" class="btn btn-outline-warning mt-3">Play Now</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sonic Wings Card -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm game-card" onclick="window.location.href='sonic_wings.html'">
-                    <div class="card-body text-center p-5">
-                        <div class="mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
-                                class="bi bi-airplane-engines text-danger" viewBox="0 0 16 16">
-                                <path
-                                    d="M8 0c-.787 0-1.292.592-1.572 1.151A4.347 4.347 0 0 0 6 3v3.691l-2 1V7.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.191l-1.17.585A1.5 1.5 0 0 0 0 10.618V12a.5.5 0 0 0 .582.493l1.631-.272.313.937a.5.5 0 0 0 .948 0l.405-1.214 2.21-.369.375 2.253-1.318 1.318A.5.5 0 0 0 5.5 16h5a.5.5 0 0 0 .354-.854l-1.318-1.318.375-2.253 2.21.369.405 1.214a.5.5 0 0 0 .948 0l.313-.937 1.63.272A.5.5 0 0 0 16 12v-1.382a1.5 1.5 0 0 0-.83-1.342L14 8.691V7.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v.191l-2-1V3c0-.242-.033-.48-.1-.702.28-.558.785-1.15 1.572-1.15.438 0 .783.32.925.83.056.2.275.308.456.205l1.5-1A.5.5 0 0 0 15 1c-1.5 0-2 1.5-2.5 2-.5.5-1 1.5-1 3 0 1.5 1 2 2.5 2 .5.5 1 1.5 1 3a2 2 0 0 1-2 2c-1.5 0-2-1.5-2.5-2-.5-.5-1-1.5-1-3 0-1.5 1-2 2.5-2 .5-.5 1-1.5 1-3a2 2 0 0 1 2-2z" />
-                                <path d="M8 1.5a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-1 0v-11a.5.5 0 0 1 .5-.5z" />
-                            </svg>
-                        </div>
-                        <h5 class="card-title">Sky Ace</h5>
-                        <p class="card-text text-muted small">Vertical shooter inspired by Sonic Wings!</p>
-                        <a href="sonic_wings.html" class="btn btn-outline-danger mt-3">Play Now</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Background particles -->
+    <div class="bg-particles">
+        <div class="particle" style="width: 4px; height: 4px; top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 80%; animation-delay: 2s;"></div>
+        <div class="particle" style="width: 3px; height: 3px; top: 40%; left: 60%; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 5px; height: 5px; top: 80%; left: 30%; animation-delay: 6s;"></div>
+        <div class="particle" style="width: 4px; height: 4px; top: 30%; left: 90%; animation-delay: 8s;"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🎮</div>
+            <h1 class="title">Game Hub</h1>
+            <p class="subtitle">Choose your adventure</p>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="games-grid">
+            <!-- Flappy Bird -->
+            <a href="bird_flight.html" class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-icon">🐦</div>
+                    <div class="game-info">
+                        <div class="game-title">Bird Flight</div>
+                        <div class="game-description">Navigate through obstacles in this addictive flying adventure
+                        </div>
+                    </div>
+                    <svg class="game-arrow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Dice Master -->
+            <a href="dice_game.html" class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-icon">🎲</div>
+                    <div class="game-info">
+                        <div class="game-title">Dice Master</div>
+                        <div class="game-description">Predict the roll, beat the AI!</div>
+                    </div>
+                    <svg class="game-arrow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Sky Ace -->
+            <a href="sky_ace.html" class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-icon">✈️</div>
+                    <div class="game-info">
+                        <div class="game-title">Sky Ace</div>
+                        <div class="game-description">Intense aerial combat with adaptive AI enemies</div>
+                    </div>
+                    <svg class="game-arrow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Block Drop -->
+            <a href="block_drop.html" class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-icon">🧱</div>
+                    <div class="game-info">
+                        <div class="game-title">Block Drop</div>
+                        <div class="game-description">Classic block-falling puzzle challenge</div>
+                    </div>
+                    <svg class="game-arrow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Chess Master -->
+            <a href="chess_game.html" class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-icon">♔</div>
+                    <div class="game-info">
+                        <div class="game-title">Chess Master</div>
+                        <div class="game-description">Learning AI opponent with PGN export</div>
+                    </div>
+                    <svg class="game-arrow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <a href='https://ko-fi.com/T6T01CQT4R' target='_blank'><img height='36' style='border:0px;height:36px;'
+                    src='https://storage.ko-fi.com/cdn/kofi3.png?v=6' border='0'
+                    alt='Buy Me a Coffee at ko-fi.com' /></a>
+            <div style="margin-top: 10px;">Made with ❤️ for mobile gaming</div>
+        </div>
+    </div>
 </body>
 
 </html>
