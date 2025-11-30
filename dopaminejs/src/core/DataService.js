@@ -4,8 +4,9 @@
  */
 
 export class DataService {
-    constructor() {
-        this.storage = window.localStorage;
+    constructor(config = {}) {
+        this.storage = config.storage || window.localStorage;
+        this.prefix = config.prefix || 'dopamine_';
     }
 
     /**
@@ -16,7 +17,7 @@ export class DataService {
     async save(key, data) {
         try {
             const serialized = JSON.stringify(data);
-            this.storage.setItem(key, serialized);
+            this.storage.setItem(this.prefix + key, serialized);
             return true;
         } catch (e) {
             console.error('Error saving data:', e);
@@ -31,7 +32,7 @@ export class DataService {
      */
     async load(key, defaultValue = null) {
         try {
-            const data = this.storage.getItem(key);
+            const data = this.storage.getItem(this.prefix + key);
             return data ? JSON.parse(data) : defaultValue;
         } catch (e) {
             console.error('Error loading data:', e);
@@ -44,8 +45,6 @@ export class DataService {
      * @param {string} key 
      */
     async clear(key) {
-        this.storage.removeItem(key);
+        this.storage.removeItem(this.prefix + key);
     }
 }
-
-export const dataService = new DataService();

@@ -70,19 +70,35 @@
     </div>
 
     <script type="module">
-        import Dopamine from './dist/dopamine.js';
+        import Dopamine from './src/index.js';
 
-        const app = new Dopamine();
+        const app = new Dopamine({
+            rewards: {
+                achievements: {
+                    'demo_clicker': {
+                        name: 'Demo Clicker',
+                        description: 'Clicked the XP button 5 times',
+                        icon: '🖱️',
+                        xp: 50,
+                        check: (player) => player.stats['demo_clicks'] >= 5
+                    }
+                }
+            }
+        });
+        
         const { rewardSystem, particleSystem, soundManager, gameUI } = await app.init();
 
         // Expose for buttons
-        window.testXP = () => {
-            rewardSystem.addXP(100, 'Demo Button');
+        window.testXP = async () => {
+            // Simulate a game "demo"
+            await rewardSystem.recordGame('demo', { score: 100, demo_clicks: 1 });
             soundManager.playClick();
         };
 
         window.testLevelUp = () => {
-            gameUI.showLevelUp(1, 2);
+            // Manually trigger for demo purposes
+            const { level } = rewardSystem.player;
+            gameUI.showLevelUp(level, level + 1);
             soundManager.playSuccess();
         };
 

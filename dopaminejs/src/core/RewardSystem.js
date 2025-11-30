@@ -3,13 +3,14 @@
  * Manages achievements, XP, levels, streaks, and rewards
  */
 
-import { dataService } from './DataService.js';
+import { EventEmitter } from './EventEmitter.js';
 
-export class RewardSystem {
-    constructor() {
+export class RewardSystem extends EventEmitter {
+    constructor(dataService, config = {}) {
+        super();
+        this.dataService = dataService;
         this.player = null;
-        this.achievements = this._initAchievements();
-        this.listeners = [];
+        this.achievements = { ...this._initAchievements(), ...(config.achievements || {}) };
     }
 
     /**
@@ -17,7 +18,7 @@ export class RewardSystem {
      * @returns {Promise<Object>} Player data
      */
     async init() {
-        this.player = await dataService.load('player', this._getDefaultPlayer());
+        this.player = await this.dataService.load('player', this._getDefaultPlayer());
 
         // Check daily streak
         this._updateDailyStreak();
@@ -57,7 +58,7 @@ export class RewardSystem {
     async save() {
         if (this.player) {
             this.player.lastPlayedAt = Date.now();
-            await dataService.save('player', this.player);
+            await this.dataService.save('player', this.player);
         }
     }
 
@@ -82,10 +83,10 @@ export class RewardSystem {
         await this.save();
 
         // Notify listeners
-        this._emit('xp_gained', { amount, reason, leveledUp, newLevel });
+        this.emit('xp_gained', { amount, reason, leveledUp, newLevel });
 
         if (leveledUp) {
-            this._emit('level_up', { oldLevel, newLevel });
+            this.emit('level_up', { oldLevel, newLevel });
         }
 
         return { leveledUp, newLevel, xpGained: amount };
@@ -135,7 +136,7 @@ export class RewardSystem {
         // Update high score if applicable
         if (result.score !== undefined && result.score > stats.highScore) {
             stats.highScore = result.score;
-            this._emit('new_high_score', { gameName, score: result.score });
+            this.emit('new_high_score', { gameName, score: result.score });
         }
 
         // Merge other result data into stats
@@ -200,7 +201,7 @@ export class RewardSystem {
         // Award XP
         await this.addXP(achievement.xp, `Achievement: ${achievement.name}`);
 
-        this._emit('achievement_unlocked', achievement);
+        this.emit('achievement_unlocked', achievement);
         await this.save();
 
         return true;
@@ -293,19 +294,6 @@ export class RewardSystem {
     }
 
     /**
-     * Event system for UI updates
-     */
-    on(event, callback) {
-        this.listeners.push({ event, callback });
-    }
-
-    _emit(event, data) {
-        this.listeners
-            .filter(l => l.event === event)
-            .forEach(l => l.callback(data));
-    }
-
-    /**
      * Initialize achievement definitions
      * Can be extended by games
      */
@@ -349,14 +337,4 @@ export class RewardSystem {
             }
         };
     }
-
-    /**
-     * Register custom achievements
-     * @param {Object} achievements 
-     */
-    registerAchievements(achievements) {
-        this.achievements = { ...this.achievements, ...achievements };
-    }
 }
-
-export const rewardSystem = new RewardSystem();

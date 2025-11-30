@@ -4,9 +4,10 @@
  */
 
 export class SoundManager {
-    constructor() {
+    constructor(config = {}) {
         this.audioContext = null;
-        this.muted = localStorage.getItem('dopamineSoundsMuted') === 'true';
+        this.storageKey = config.storageKey || 'dopamineSoundsMuted';
+        this.muted = localStorage.getItem(this.storageKey) === 'true';
     }
 
     /**
@@ -24,7 +25,7 @@ export class SoundManager {
      */
     toggleMute() {
         this.muted = !this.muted;
-        localStorage.setItem('dopamineSoundsMuted', this.muted);
+        localStorage.setItem(this.storageKey, this.muted);
         return this.muted;
     }
 
@@ -85,5 +86,3 @@ export class SoundManager {
         this.playTone(200, 0.2, 'sawtooth', 0.3);
     }
 }
-
-export const soundManager = new SoundManager();

@@ -3,10 +3,9 @@
  * Reusable UI elements for XP bars, achievement popups, level-up screens, etc.
  */
 
-import { particleSystem } from '../effects/ParticleSystem.js';
-
 export class GameUI {
-    constructor() {
+    constructor(particleSystem) {
+        this.particleSystem = particleSystem;
         this.container = null;
         this.xpBar = null;
         this.levelDisplay = null;
@@ -119,7 +118,7 @@ export class GameUI {
         // Trigger confetti at popup location
         setTimeout(() => {
             const rect = popup.getBoundingClientRect();
-            particleSystem.confetti(rect.left + rect.width / 2, rect.top + rect.height / 2, 40);
+            this.particleSystem.confetti(rect.left + rect.width / 2, rect.top + rect.height / 2, 40);
         }, 300);
 
         // Remove after animation
@@ -151,7 +150,7 @@ export class GameUI {
                 setTimeout(() => {
                     const x = Math.random() * window.innerWidth;
                     const y = Math.random() * window.innerHeight * 0.6;
-                    particleSystem.confetti(x, y, 30);
+                    this.particleSystem.confetti(x, y, 30);
                 }, i * 200);
             }
         }, 300);
@@ -185,7 +184,7 @@ export class GameUI {
      */
     showCombo(multiplier, x, y) {
         this.showFloatingText(`${multiplier}× COMBO!`, x, y, '#ff6b6b', '32px');
-        particleSystem.fire(x, y, 20);
+        this.particleSystem.fire(x, y, 20);
     }
 
     /**
@@ -193,7 +192,7 @@ export class GameUI {
      */
     showNearMiss(x, y) {
         this.showFloatingText('CLOSE CALL!', x, y, '#45b7d1', '20px');
-        particleSystem.sparkle(x, y, 15, '#45b7d1');
+        this.particleSystem.sparkle(x, y, 15, '#45b7d1');
     }
 
     /**
@@ -201,8 +200,8 @@ export class GameUI {
      */
     showLuckyMoment(multiplier, x, y) {
         this.showFloatingText(`LUCKY ${multiplier}×!`, x, y, '#ffd700', '36px');
-        particleSystem.starBurst(x, y, 12);
-        particleSystem.confetti(x, y, 25);
+        this.particleSystem.starBurst(x, y, 12);
+        this.particleSystem.confetti(x, y, 25);
     }
 
     /**
@@ -254,5 +253,3 @@ export class GameUI {
         document.body.appendChild(overlay);
     }
 }
-
-export const gameUI = new GameUI();

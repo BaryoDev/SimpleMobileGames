@@ -4,21 +4,21 @@
  */
 
 export class ParticleSystem {
-    constructor(canvasId = 'dopamine-particle-canvas') {
-        this.canvasId = canvasId;
-        this.canvas = document.getElementById(canvasId);
+    constructor(config = {}) {
+        this.canvasId = config.canvasId || 'dopamine-particle-canvas';
+        this.canvas = document.getElementById(this.canvasId);
 
         if (!this.canvas) {
             // Create overlay canvas if it doesn't exist
             this.canvas = document.createElement('canvas');
-            this.canvas.id = canvasId;
+            this.canvas.id = this.canvasId;
             this.canvas.style.position = 'fixed';
             this.canvas.style.top = '0';
             this.canvas.style.left = '0';
             this.canvas.style.width = '100%';
             this.canvas.style.height = '100%';
             this.canvas.style.pointerEvents = 'none';
-            this.canvas.style.zIndex = '9999';
+            this.canvas.style.zIndex = config.zIndex || '9999';
             document.body.appendChild(this.canvas);
         }
 
@@ -255,5 +255,3 @@ export class ParticleSystem {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
-
-export const particleSystem = new ParticleSystem();
