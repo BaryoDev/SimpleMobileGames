@@ -1,4 +1,4 @@
-package com.example.htmlgames;
+package com.baryodev.birdflight;
 
 import com.getcapacitor.BridgeActivity;
 

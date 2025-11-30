@@ -46,7 +46,7 @@ test.describe('Bird Flight Game', () => {
 });
 
 // Dice Master Tests
-test.describe('Dice Master Game', () => {
+test.describe.skip('Dice Master Game', () => {
     test('should load and render dice container', async ({ page }) => {
         await page.goto(`${BASE_URL}/dice_game.html`);
         const container = await page.locator('.game-container');
@@ -81,7 +81,7 @@ test.describe('Dice Master Game', () => {
 });
 
 // Sky Ace Tests
-test.describe('Sky Ace Game', () => {
+test.describe.skip('Sky Ace Game', () => {
     test('should load and show start screen', async ({ page }) => {
         await page.goto(`${BASE_URL}/sky_ace.html`);
         const startScreen = await page.locator('#startScreen');
@@ -111,7 +111,7 @@ test.describe('Sky Ace Game', () => {
 });
 
 // Block Drop Tests
-test.describe('Block Drop Game', () => {
+test.describe.skip('Block Drop Game', () => {
     test('should load and render game board', async ({ page }) => {
         await page.goto(`${BASE_URL}/block_drop.html`);
         const canvas = await page.locator('#gameCanvas');
@@ -143,7 +143,7 @@ test.describe('Block Drop Game', () => {
 });
 
 // Chess Master Tests
-test.describe('Chess Master Game', () => {
+test.describe.skip('Chess Master Game', () => {
     test('should load and show coin toss modal', async ({ page }) => {
         await page.goto(`${BASE_URL}/chess_game.html`);
         const coinModal = await page.locator('#coinModal');
@@ -180,10 +180,10 @@ test.describe('Chess Master Game', () => {
 test.describe('Common Features', () => {
     const games = [
         { name: 'Bird Flight', file: 'bird_flight.html' },
-        { name: 'Dice Master', file: 'dice_game.html' },
-        { name: 'Sky Ace', file: 'sky_ace.html' },
-        { name: 'Block Drop', file: 'block_drop.html' },
-        { name: 'Chess Master', file: 'chess_game.html' },
+        // { name: 'Dice Master', file: 'dice_game.html' },
+        // { name: 'Sky Ace', file: 'sky_ace.html' },
+        // { name: 'Block Drop', file: 'block_drop.html' },
+        // { name: 'Chess Master', file: 'chess_game.html' },
     ];
 
     for (const game of games) {
@@ -223,10 +223,12 @@ test.describe('Main Menu', () => {
         await expect(header).toBeVisible();
     });
 
-    test('should have all 5 game cards', async ({ page }) => {
+    test('should have 1 visible game card', async ({ page }) => {
         await page.goto(`${BASE_URL}/index.html`);
         const gameCards = await page.locator('.game-card').all();
-        expect(gameCards.length).toBe(5);
+        // Since we commented out the others in HTML, Playwright shouldn't find them
+        // But if they are just commented out, they are not in the DOM.
+        expect(gameCards.length).toBe(1);
     });
 
     test('should have Ko-fi button', async ({ page }) => {
@@ -240,10 +242,10 @@ test.describe('Main Menu', () => {
 
         const expectedGames = [
             { href: 'bird_flight.html', name: 'Bird Flight' },
-            { href: 'dice_game.html', name: 'Dice Master' },
-            { href: 'sky_ace.html', name: 'Sky Ace' },
-            { href: 'block_drop.html', name: 'Block Drop' },
-            { href: 'chess_game.html', name: 'Chess Master' },
+            // { href: 'dice_game.html', name: 'Dice Master' },
+            // { href: 'sky_ace.html', name: 'Sky Ace' },
+            // { href: 'block_drop.html', name: 'Block Drop' },
+            // { href: 'chess_game.html', name: 'Chess Master' },
         ];
 
         for (const game of expectedGames) {
