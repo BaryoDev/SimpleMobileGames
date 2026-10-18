@@ -8,6 +8,13 @@ import { createScreens, svgElement, FLAME_ICON } from './ui/screens.js';
 import { createStorage } from './platform/storage.js';
 import { migrateV1 } from './migrate.js';
 import { addScore, sanitize, LEADERBOARD_KEY } from './leaderboard.js';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
+import { Haptics } from '@capacitor/haptics';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { createHaptics } from './platform/haptics.js';
+import { wireLifecycle } from './platform/lifecycle.js';
 import { createRewards, recordRun, GAME } from './progression/rewards.js';
 
 const NAME_KEY = 'player_name';
@@ -140,10 +147,26 @@ async function boot() {
     });
   });
 
+  const native = Capacitor.isNativePlatform();
+  const haptics = createHaptics(Haptics, native);
+
   const newWorld = () =>
     createWorld({ width: window.innerWidth, height: window.innerHeight, seed: (Date.now() ^ (Math.random() * 2 ** 32)) >>> 0 });
   let world = newWorld();
   let mode = 'menu';
+
+  function toStart() {
+    world = newWorld();
+    scene.setWorld(world);
+    mode = 'menu';
+    screens.setName(playerName);
+    screens.showReady(best);
+  }
+
+  function resumeRun() {
+    scene.resume();
+    screens.hidePaused();
+  }
 
   const screens = createScreens(document.getElementById('ui'), {
     onStart(name) {
@@ -153,17 +176,8 @@ async function boot() {
       mode = 'playing';
       screens.showPlaying();
     },
-    onRestart() {
-      world = newWorld();
-      scene.setWorld(world);
-      mode = 'menu';
-      screens.setName(playerName);
-      screens.showReady(best);
-    },
-    onResume() {
-      scene.resume();
-      screens.hidePaused();
-    },
+    onRestart: toStart,
+    onResume: resumeRun,
     onToggleMute() {
       return sound.toggleMute();
     },
@@ -194,6 +208,7 @@ async function boot() {
     mode = 'over';
     const score = world.score;
     safe(() => sound.playGameOver());
+    haptics.crash();
     let entries = board;
     let run = null;
     try {
@@ -226,11 +241,13 @@ async function boot() {
     onEvents(events) {
       if (events.flapped) {
         safe(() => sound.playJump());
+        haptics.flap();
         screens.hideFlapHint();
       }
       if (events.scored) {
         screens.showScore(world.score);
         safe(() => sound.playScore());
+        haptics.score();
         safe(() => celebrate(world.score));
       }
       if (events.nearMiss) {
@@ -274,6 +291,26 @@ async function boot() {
 
   game.setScene(scene);
   game.start();
+
+  if (native) {
+    wireLifecycle({
+      App,
+      scene,
+      onPause: () => screens.showPaused(),
+      onBack(action) {
+        if (action === 'pause') {
+          scene.pause();
+          screens.showPaused();
+        } else if (action === 'resume') resumeRun();
+        else if (action === 'ready' || mode === 'playing') toStart();
+        else App.exitApp();
+      },
+    });
+    const quiet = (call) => safe(() => Promise.resolve(call()).catch(() => {}));
+    quiet(() => StatusBar.setStyle({ style: Style.Light }));
+    quiet(() => StatusBar.setOverlaysWebView({ overlay: false }));
+    requestAnimationFrame(() => requestAnimationFrame(() => quiet(() => SplashScreen.hide())));
+  }
 
   if (import.meta.env.DEV || new URLSearchParams(window.location.search).get('test') === '1') {
     window.__bf = {
