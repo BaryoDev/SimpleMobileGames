@@ -199,6 +199,9 @@ export function createScreens(root, handlers) {
       show(overScreen, true);
       overShownAt = performance.now();
     },
+    overGuardClear() {
+      return performance.now() - overShownAt >= OVER_GUARD_MS;
+    },
     showPaused() {
       show(pausedScreen, true);
     },

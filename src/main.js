@@ -283,7 +283,7 @@ async function boot() {
   window.addEventListener('keydown', onInput);
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && mode === 'playing' && world.phase === 'playing') {
+    if (document.hidden && !scene.paused && mode === 'playing' && world.phase === 'playing') {
       scene.pause();
       screens.showPaused();
     }
@@ -302,7 +302,9 @@ async function boot() {
           scene.pause();
           screens.showPaused();
         } else if (action === 'resume') resumeRun();
-        else if (action === 'ready' || mode === 'playing') toStart();
+        else if (action === 'ready') {
+          if (screens.overGuardClear()) toStart();
+        } else if (mode === 'playing') toStart();
         else App.exitApp();
       },
     });

@@ -70,12 +70,48 @@ describe('wireLifecycle', () => {
   it('time away is not seen as steps after resume', () => {
     const world = createWorld({ width: 400, height: 700, seed: 1 });
     const scene = new FlightScene({ world, onEvents: () => {} });
-    scene.kernel = { events: new EventBus() };
+    const events = new EventBus();
+    scene.kernel = { events };
     scene.onEnter();
+    scene.update(1 / 60);
+    expect(scene._acc).toBeGreaterThan(0);
     scene.pause();
-    scene.update(10);
     scene.resume();
     expect(scene._acc).toBe(0);
+    let steps = 0;
+    events.on('fixed_update', () => {
+      steps += 1;
+    });
+    scene.update(10);
+    expect(scene._acc).toBeLessThanOrEqual(5 / 60 + 1e-9);
+    expect(steps).toBe(0);
+  });
+
+  it.each(['resume', 'ready', 'exit'])('reports %s to onBack', (action) => {
+    const state = {
+      resume: ['playing', true],
+      ready: ['over', false],
+      exit: ['ready', false],
+    }[action];
+    const App = fakeApp();
+    const onBack = vi.fn();
+    wireLifecycle({ App, scene: fakeScene(state[0], state[1]), onBack });
+    App.listeners.backButton({});
+    expect(onBack).toHaveBeenCalledWith(action);
+  });
+
+  it('a failed registration does not become an unhandled rejection', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const App = { addListener: vi.fn(() => Promise.reject(new Error('no plugin'))) };
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+    const off = wireLifecycle({ App, scene: fakeScene(), onBack: () => {} });
+    await new Promise((r) => setTimeout(r));
+    await off();
+    process.off('unhandledRejection', unhandled);
+    expect(unhandled).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
 
@@ -101,17 +137,20 @@ describe('createHaptics', () => {
   });
 
   it('never throws on sync throws or rejections', async () => {
+    const rejected = Promise.reject(new Error('y'));
+    const caught = vi.spyOn(rejected, 'catch');
     const Haptics = {
       impact: vi.fn(() => {
         throw new Error('x');
       }),
-      notification: vi.fn(() => Promise.reject(new Error('y'))),
+      notification: vi.fn(() => rejected),
     };
     const h = createHaptics(Haptics, true);
     expect(() => {
       h.flap();
       h.crash();
     }).not.toThrow();
-    await Promise.resolve();
+    await new Promise((r) => setTimeout(r));
+    expect(caught).toHaveBeenCalled();
   });
 });
