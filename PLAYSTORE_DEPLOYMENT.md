@@ -1,6 +1,6 @@
 # Google Play Store Deployment Guide
 
-This guide will walk you through deploying your HTML Games app to the Google Play Store.
+This guide will walk you through deploying your Bird Flight app to the Google Play Store.
 
 ## Prerequisites
 
@@ -100,7 +100,7 @@ Also update `capacitor.config.json`:
 ```json
 {
   "appId": "com.yourdomain.htmlgames",
-  "appName": "Game Hub"
+  "appName": "Bird Flight"
 }
 ```
 
@@ -153,7 +153,7 @@ cd android
 
 1. Click "Create app"
 2. Fill in:
-   - App name: "Game Hub" (or your preferred name)
+   - App name: "Bird Flight" (or your preferred name)
    - Default language: English
    - App or game: Game
    - Free or paid: Free
@@ -163,17 +163,11 @@ cd android
 ## Step 8: Complete Store Listing
 
 ### Main Store Listing
-- **App name**: Game Hub
-- **Short description**: Classic arcade games in one app
+- **App name**: Bird Flight
+- **Short description**: Tap to flap through the pipes
 - **Full description**: 
   ```
-  Enjoy three classic arcade-style games:
-  
-  🐦 Flappy Bird - Navigate through pipes
-  🎲 Dice Master - Predict the roll
-  ✈️ Sky Ace - Vertical shooter action
-  
-  All games feature smooth gameplay and retro fun!
+  Bird Flight is a one-tap flying game. Tap to flap, slip through the pipes and beat your best score.
   ```
 
 ### Graphics
@@ -191,11 +185,11 @@ cd android
 Create a simple privacy policy:
 
 ```markdown
-# Privacy Policy for Game Hub
+# Privacy Policy for Bird Flight
 
 We do not collect, store, or share any personal information.
 This app does not require internet permissions.
-All games run locally on your device.
+The game runs locally on your device.
 
 Contact: your-email@example.com
 Last updated: [Current Date]

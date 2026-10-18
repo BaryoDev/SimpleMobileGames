@@ -1,16 +1,16 @@
-# Privacy Policy for Game Hub
+# Privacy Policy for Bird Flight
 
-**Effective Date:** November 26, 2024
+**Effective Date:** 2026-10-18
 
 ## Overview
 
-Game Hub ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains our practices regarding data collection and use.
+Bird Flight ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains our practices regarding data collection and use.
 
 ## Information We Collect
 
 **We do not collect any personal information.**
 
-Game Hub operates entirely offline and does not:
+Bird Flight operates entirely offline and does not:
 - Collect personal data
 - Track user behavior
 - Store user information on external servers
@@ -20,11 +20,11 @@ Game Hub operates entirely offline and does not:
 
 ## Data Storage
 
-All game progress and scores are stored locally on your device only. We do not have access to this information, and it is never transmitted to our servers or third parties.
+Your best score and settings are stored locally on your device only. We do not have access to this information, and it is never transmitted to our servers or third parties.
 
 ## Third-Party Services
 
-Game Hub does not use any third-party services, SDKs, or analytics tools that could collect your data.
+Bird Flight does not use any third-party services, SDKs, or analytics tools that could collect your data.
 
 ## Children's Privacy
 
@@ -32,7 +32,7 @@ Our app does not collect any information from anyone, including children under t
 
 ## Permissions
 
-Game Hub does not require any special permissions to function. If your device requests permissions, they are not being used by our app.
+Bird Flight does not require any special permissions to function. If your device requests permissions, they are not being used by our app.
 
 ## Changes to This Privacy Policy
 
@@ -42,10 +42,10 @@ We may update this Privacy Policy from time to time. Any changes will be posted 
 
 If you have any questions about this Privacy Policy, please contact us at:
 
-**Email:** [your-email@example.com]
+**Email:** baryodev@gmail.com
 
 ---
 
-**Last Updated:** November 26, 2024
+**Last Updated:** 2026-10-18
 
-© 2024 Game Hub. All rights reserved.
+© 2026 Bird Flight. All rights reserved.

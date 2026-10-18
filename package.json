@@ -1,31 +1,41 @@
 {
-  "name": "htmlgames",
-  "version": "1.0.0",
-  "description": "A collection of browser-based games built with HTML5, CSS, and JavaScript. This project serves as a playground for experimenting with game development using standard web technologies.",
-  "main": "index.js",
+  "name": "bird-flight",
+  "version": "2.0.0",
+  "description": "Bird Flight, a one-tap flying game for Android built with Vite and Capacitor.",
+  "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:build": "playwright test && echo '✅ All tests passed!'",
-    "build": "npm run test:build && npx cap sync && cd android && export JAVA_HOME=$(/usr/libexec/java_home -v 21) && ./gradlew assembleDebug",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "sync": "npm run build && cap sync android",
+    "bundle": "npm run sync && cd android && JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew bundleRelease",
+    "apk": "npm run sync && cd android && JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew assembleDebug",
     "deploy": "npm run build && ~/Library/Android/sdk/platform-tools/adb -s R3CT50BYRVY install -r android/app/build/outputs/apk/debug/app-debug.apk && ~/Library/Android/sdk/platform-tools/adb -s R3CT50BYRVY shell am start -n com.example.htmlgames/.MainActivity"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BaryoDev/SimpleMobileGames.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/BaryoDev/SimpleMobileGames/issues"
   },
   "homepage": "https://github.com/BaryoDev/SimpleMobileGames#readme",
   "dependencies": {
-    "@capacitor/android": "^7.4.4",
-    "@capacitor/cli": "^7.4.4",
-    "@capacitor/core": "^7.4.4"
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/cli": "8.5.3",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/preferences": "8.0.1",
+    "@capacitor/splash-screen": "8.0.2",
+    "@capacitor/status-bar": "8.0.4",
+    "dopaminejs": "2.4.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0"
+    "@playwright/test": "1.64.1",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
   }
 }
