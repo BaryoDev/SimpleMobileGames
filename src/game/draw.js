@@ -72,10 +72,10 @@ function drawPipes(ctx, world) {
   }
 }
 
-function drawBird(ctx, world, alpha, time) {
+function drawBird(ctx, world, alpha, time, prevY) {
   const { bird } = world;
   const r = RULES.birdRadius;
-  const prev = bird.prevY ?? bird.y;
+  const prev = prevY ?? bird.y;
   let y = prev + (bird.y - prev) * Math.min(1, Math.max(0, alpha));
   if (world.phase === 'ready') y = bird.y + Math.sin(time * 6) * 5;
   const rotation =
@@ -122,11 +122,11 @@ function drawBird(ctx, world, alpha, time) {
   ctx.restore();
 }
 
-export function drawWorld(ctx, world, alpha, time) {
+export function drawWorld(ctx, world, alpha, time, prevY) {
   ctx.fillStyle = COLORS.sky;
   ctx.fillRect(0, 0, world.width, world.height);
   drawClouds(ctx, world, time);
   drawGround(ctx, world);
   drawPipes(ctx, world);
-  drawBird(ctx, world, alpha, time);
+  drawBird(ctx, world, alpha, time, prevY);
 }

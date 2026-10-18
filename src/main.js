@@ -39,9 +39,61 @@ function parseBoard(raw) {
   }
 }
 
+function guardedLocalStorage() {
+  const fallback = new Map();
+  return {
+    getItem(key) {
+      try {
+        return window.localStorage.getItem(key);
+      } catch {
+        return fallback.get(key) ?? null;
+      }
+    },
+    setItem(key, value) {
+      try {
+        window.localStorage.setItem(key, value);
+      } catch {
+        fallback.set(key, String(value));
+      }
+    },
+    removeItem(key) {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        fallback.delete(key);
+      }
+    },
+  };
+}
+
+function createMemoryStore() {
+  const data = new Map();
+  return {
+    async getItem(key) {
+      return data.has(key) ? data.get(key) : null;
+    },
+    async setItem(key, value) {
+      data.set(key, String(value));
+    },
+    async removeItem(key) {
+      data.delete(key);
+    },
+  };
+}
+
 async function boot() {
-  const store = createStorage();
-  await safe(() => migrateV1({ legacy: window.localStorage, store }));
+  let store;
+  try {
+    store = createStorage();
+  } catch (error) {
+    console.warn('[bird-flight] storage unavailable, using memory', error);
+    store = createMemoryStore();
+  }
+  try {
+    await migrateV1({ legacy: window.localStorage, store });
+  } catch (error) {
+    console.warn('[bird-flight] migration failed', error);
+  }
 
   let rewards = null;
   try {
@@ -66,7 +118,7 @@ async function boot() {
   const game = new Game({ canvas, width: window.innerWidth, height: window.innerHeight, backgroundColor: '#70c5ce' });
   const particles = new ParticleSystem();
   const gameUI = new GameUI(particles);
-  const sound = new SoundManager();
+  const sound = new SoundManager({ storage: guardedLocalStorage() });
 
   const streakIcon = gameUI.container.querySelector('.streak-icon');
   const flame = svgElement(FLAME_ICON);
@@ -198,12 +250,14 @@ async function boot() {
     game.renderer.resize(Math.round(w * dpr), Math.round(h * dpr));
     scene.dpr = dpr;
     resize(world, w, h);
+    scene.snap();
   }
   fit();
   window.addEventListener('resize', fit);
 
   const onInput = (event) => {
-    if (mode !== 'playing') return;
+    if (mode !== 'playing' || scene.paused) return;
+    if (event.type === 'keydown' && event.repeat) return;
     if (!shouldFlap(event, world.phase)) return;
     if (event.type === 'keydown') event.preventDefault();
     scene.flap();

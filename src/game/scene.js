@@ -14,6 +14,7 @@ export class FlightScene extends Scene {
     this._flap = false;
     this._paused = false;
     this._acc = 0;
+    this._prevY = world.bird.y;
     this._onFixed = (e) => this._fixed(e.dt);
   }
 
@@ -25,6 +26,15 @@ export class FlightScene extends Scene {
     this.world = world;
     this._flap = false;
     this._acc = 0;
+    this._prevY = world.bird.y;
+  }
+
+  get alpha() {
+    return this._acc / FIXED_DT;
+  }
+
+  snap() {
+    this._prevY = this.world.bird.y;
   }
 
   flap() {
@@ -37,6 +47,8 @@ export class FlightScene extends Scene {
 
   resume() {
     this._paused = false;
+    this._flap = false;
+    this._acc = 0;
   }
 
   onEnter() {
@@ -56,7 +68,7 @@ export class FlightScene extends Scene {
     if (this._paused) return;
     this._acc = Math.max(0, this._acc - dt);
     const { world } = this;
-    world.bird.prevY = world.bird.y;
+    this._prevY = world.bird.y;
     const events = step(world, dt, { flap: this._flap });
     this._flap = false;
     this.onEvents(events);
@@ -64,6 +76,6 @@ export class FlightScene extends Scene {
 
   render(ctx) {
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    drawWorld(ctx, this.world, this._acc / FIXED_DT, performance.now() / 1000);
+    drawWorld(ctx, this.world, this.alpha, performance.now() / 1000, this._prevY);
   }
 }

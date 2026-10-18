@@ -1,18 +1,50 @@
 const OVER_GUARD_MS = 400;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+const SVG_ELEMENTS = new Set([
+  'svg', 'g', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse',
+  'defs', 'lineargradient', 'radialgradient', 'stop', 'title', 'text',
+]);
+const SVG_ATTRIBUTES = new Set([
+  'xmlns', 'viewbox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
+  'stroke-linejoin', 'stroke-opacity', 'fill-opacity', 'fill-rule', 'clip-rule', 'opacity',
+  'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'points', 'transform',
+  'offset', 'stop-color', 'stop-opacity', 'id', 'gradientunits', 'gradienttransform',
+  'aria-hidden', 'text-anchor', 'textlength', 'lengthadjust', 'font-size', 'font-weight',
+  'font-family',
+]);
+
+function allowedValue(value) {
+  const v = value.trim().toLowerCase();
+  if (v.includes('javascript:')) return false;
+  return !v.includes('url(') || /^url\(#[\w-]+\)$/.test(v);
+}
+
+function clean(node) {
+  for (const child of [...node.children]) {
+    if (!SVG_ELEMENTS.has(child.localName.toLowerCase())) {
+      child.remove();
+      continue;
+    }
+    for (const attr of [...child.attributes]) {
+      if (!SVG_ATTRIBUTES.has(attr.name.toLowerCase()) || !allowedValue(attr.value)) {
+        child.removeAttribute(attr.name);
+      }
+    }
+    clean(child);
+  }
+}
+
 export function svgElement(markup) {
   const doc = new DOMParser().parseFromString(String(markup ?? ''), 'image/svg+xml');
   const root = doc.documentElement;
   if (!root || root.localName !== 'svg' || doc.querySelector('parsererror')) return null;
-  for (const el of root.querySelectorAll('script, foreignObject, iframe, style')) el.remove();
-  for (const el of [root, ...root.querySelectorAll('*')]) {
-    for (const attr of [...el.attributes]) {
-      const name = attr.name.toLowerCase();
-      const value = attr.value.trim().toLowerCase();
-      if (name.startsWith('on') || value.startsWith('javascript:')) el.removeAttribute(attr.name);
+  for (const attr of [...root.attributes]) {
+    if (!SVG_ATTRIBUTES.has(attr.name.toLowerCase()) || !allowedValue(attr.value)) {
+      root.removeAttribute(attr.name);
     }
   }
+  clean(root);
   return document.importNode(root, true);
 }
 
@@ -107,6 +139,7 @@ export function createScreens(root, handlers) {
   startForm.addEventListener('submit', (e) => {
     e.preventDefault();
     nameInput.blur();
+    startBtn.blur();
     handlers.onStart(nameInput.value);
   });
   restartBtn.addEventListener('click', () => {
