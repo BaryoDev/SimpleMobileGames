@@ -2,6 +2,7 @@ import { RULES, speedFor, gapFor, pipeRange } from './rules.js';
 import { seeded } from './random.js';
 
 const MAX_SUBSTEP = 1 / 60;
+const MIN_GAP = 60;
 
 export function createWorld({ width, height, seed }) {
   return {
@@ -17,7 +18,8 @@ export function createWorld({ width, height, seed }) {
 }
 
 function spawnPipe(world) {
-  const gap = gapFor(world.score);
+  const roomy = world.height - RULES.groundHeight - 2 * RULES.pipeMargin;
+  const gap = Math.max(MIN_GAP, Math.min(gapFor(world.score), roomy));
   const { min, max } = pipeRange(world.height, gap);
   world.pipes.push({
     x: world.width,
@@ -108,11 +110,12 @@ export function step(world, dt, input) {
 }
 
 export function resize(world, width, height) {
-  const ratio = world.bird.y / world.height;
+  const ratio = world.height > 0 ? world.bird.y / world.height : 0.5;
   world.width = width;
   world.height = height;
   world.bird.x = width / 4;
-  world.bird.y = ratio * height;
+  const lowest = Math.max(RULES.birdRadius, height - RULES.groundHeight - RULES.birdRadius);
+  world.bird.y = Math.min(lowest, Math.max(RULES.birdRadius, ratio * height));
   for (const p of world.pipes) {
     const { min, max } = pipeRange(height, p.gap);
     p.top = Math.min(max, Math.max(min, p.top));

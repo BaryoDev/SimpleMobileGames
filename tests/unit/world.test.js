@@ -43,9 +43,12 @@ describe('world', () => {
     const run = () => {
       const w = createWorld({ width: 400, height: 600, seed: 3 });
       for (let i = 0; i < 600; i++) step(w, DT, { flap: i % 25 === 0 });
-      return { y: w.bird.y, score: w.score, pipes: w.pipes };
+      return { y: w.bird.y, score: w.score, distance: w.distance, pipes: w.pipes };
     };
-    expect(run()).toEqual(run());
+    const a = run();
+    expect(a.distance).toBeGreaterThan(0);
+    expect(a.pipes.length).toBeGreaterThan(0);
+    expect(a).toEqual(run());
   });
 
   it('scores once per pipe', () => {
@@ -90,19 +93,23 @@ describe('world', () => {
     expect(w.phase).toBe('playing');
   });
 
-  it('one long step cannot tunnel through the floor', () => {
+  it('a long step onto the floor crashes and stops within one substep of it', () => {
     const w = playing();
-    w.bird.y = w.height - RULES.groundHeight - 20;
+    const floorY = w.height - RULES.groundHeight;
+    w.bird.y = floorY - 20;
     w.bird.vy = RULES.maxFall;
-    step(w, 5 / 60, idle);
+    const e = step(w, 5 / 60, idle);
+    expect(e.crashed).toBe(true);
     expect(w.phase).toBe('over');
+    const boxBottom = w.bird.y + RULES.birdRadius - RULES.hitInset;
+    expect(boxBottom - floorY).toBeLessThanOrEqual(RULES.maxFall / 60 + 0.01);
   });
 
   it('one long step cannot tunnel through a pipe', () => {
-    const w = playing();
+    const w = playing({ height: 1200 });
     w.bird.y = 300;
-    w.pipes = [{ x: w.bird.x + 20, top: 50, gap: 100, passed: false, nearMiss: false }];
-    step(w, 5 / 60, idle);
+    w.pipes = [{ x: w.bird.x + 10, top: 50, gap: 100, passed: false, nearMiss: false }];
+    step(w, 0.5, idle);
     expect(w.phase).toBe('over');
   });
 
@@ -131,18 +138,34 @@ describe('world', () => {
   it('pipe range never inverts', () => {
     const r = pipeRange(300, 150);
     expect(r.max).toBeGreaterThanOrEqual(r.min);
-    const w = playing({ width: 320, height: 480 });
+    const w = playing({ width: 320, height: 300 });
+    const seen = [];
     for (let i = 0; i < 600; i++) {
-      w.bird.y = 200;
+      w.bird.y = 150;
+      w.bird.vy = 0;
+      w.phase = 'playing';
+      step(w, DT, idle);
+      for (const p of w.pipes) seen.push({ top: p.top, gap: p.gap });
+    }
+    expect(seen.length).toBeGreaterThan(0);
+    for (const p of seen) {
+      const range = pipeRange(300, p.gap);
+      expect(p.top).toBeGreaterThanOrEqual(range.min);
+      expect(p.top).toBeLessThanOrEqual(range.max);
+    }
+  });
+
+  it('on a short screen the gap stays above the floor', () => {
+    const w = playing({ width: 320, height: 280 });
+    for (let i = 0; i < 300; i++) {
+      w.bird.y = 140;
       w.bird.vy = 0;
       w.phase = 'playing';
       step(w, DT, idle);
     }
-    const range = pipeRange(480, gapFor(0));
     expect(w.pipes.length).toBeGreaterThan(0);
     for (const p of w.pipes) {
-      expect(p.top).toBeGreaterThanOrEqual(range.min);
-      expect(p.top).toBeLessThanOrEqual(range.max);
+      expect(p.top + p.gap).toBeLessThanOrEqual(280 - RULES.groundHeight);
     }
   });
 
@@ -169,6 +192,7 @@ describe('world', () => {
       return seen;
     };
     expect(tops(7)).toEqual(tops(7));
+    expect(tops(7)).not.toEqual(tops(8));
     expect(tops(7).length).toBeGreaterThan(2);
   });
 
@@ -179,5 +203,18 @@ describe('world', () => {
     expect(w.bird.y).toBeCloseTo(240);
     const r = pipeRange(480, 150);
     expect(w.pipes[0].top).toBeLessThanOrEqual(r.max);
+  });
+
+  it('resize keeps the bird above the ground and finite', () => {
+    const w = playing();
+    w.bird.y = 570;
+    resize(w, 320, 200);
+    expect(w.bird.y + RULES.birdRadius).toBeLessThanOrEqual(200 - RULES.groundHeight);
+    resize(w, 320, 0);
+    expect(Number.isFinite(w.bird.y)).toBe(true);
+    expect(w.bird.y).toBeGreaterThanOrEqual(RULES.birdRadius);
+    const z = createWorld({ width: 320, height: 0, seed: 1 });
+    resize(z, 320, 480);
+    expect(Number.isFinite(z.bird.y)).toBe(true);
   });
 });
