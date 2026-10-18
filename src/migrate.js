@@ -15,38 +15,43 @@ function parse(raw) {
   }
 }
 
-async function attempt(fn) {
+function readLegacy(legacy, key) {
   try {
-    await fn();
+    return legacy.getItem(key);
   } catch {
-    // saved data is untrusted, a bad key is skipped
+    return null;
   }
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 export async function migrateV1({ legacy, store }) {
   try {
     if ((await store.getItem(DONE_KEY)) !== null) return { migrated: false };
+
+    const rawPlayer = readLegacy(legacy, V1_PLAYER);
+    if (isPlainObject(parse(rawPlayer))) {
+      const existing = await store.getItem(PLAYER_KEY);
+      if (!isPlainObject(parse(existing))) await store.setItem(PLAYER_KEY, rawPlayer);
+    }
+
+    const rows = sanitize(parse(readLegacy(legacy, V1_LEADERBOARD)));
+    if (rows.length > 0 && (await store.getItem(LEADERBOARD_KEY)) === null) {
+      await store.setItem(LEADERBOARD_KEY, JSON.stringify(rows));
+    }
+
+    try {
+      if (readLegacy(legacy, V1_MUTED) === 'true') legacy.setItem(MUTED_KEY, 'true');
+    } catch {
+      // the mute flag is a nicety, not worth a retry
+    }
+
+    await store.setItem(DONE_KEY, '1');
+    return { migrated: true };
   } catch {
+    // a store write failed, so the flag stays unset and the next boot retries
     return { migrated: false };
   }
-
-  await attempt(async () => {
-    const raw = legacy.getItem(V1_PLAYER);
-    const player = parse(raw);
-    if (player === null || typeof player !== 'object' || Array.isArray(player)) return;
-    if ((await store.getItem(PLAYER_KEY)) === null) await store.setItem(PLAYER_KEY, raw);
-  });
-
-  await attempt(async () => {
-    const rows = parse(legacy.getItem(V1_LEADERBOARD));
-    if (!Array.isArray(rows)) return;
-    await store.setItem(LEADERBOARD_KEY, JSON.stringify(sanitize(rows)));
-  });
-
-  await attempt(async () => {
-    if (legacy.getItem(V1_MUTED) === 'true') legacy.setItem(MUTED_KEY, 'true');
-  });
-
-  await attempt(() => store.setItem(DONE_KEY, '1'));
-  return { migrated: true };
 }

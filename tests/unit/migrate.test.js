@@ -87,4 +87,49 @@ describe('migrateV1', () => {
     await migrateV1({ legacy, store: asyncStore() });
     expect(legacy.getItem('dopamineSoundsMuted')).toBe('true');
   });
+
+  it('does not set the flag when a store write fails, and retries later', async () => {
+    const legacy = legacyWith({ simplemobilegames_player: JSON.stringify(PLAYER) });
+    const broken = asyncStore();
+    broken.setItem = async (k, v) => {
+      if (k === 'dopamine_player') throw new Error('disk');
+      broken.map.set(k, String(v));
+    };
+    await expect(migrateV1({ legacy, store: broken })).resolves.toEqual({ migrated: false });
+    expect(broken.map.has('migrated_v1')).toBe(false);
+
+    const store = asyncStore();
+    await expect(migrateV1({ legacy, store })).resolves.toEqual({ migrated: true });
+    expect(JSON.parse(store.map.get('dopamine_player'))).toEqual(PLAYER);
+  });
+
+  it('keeps the leaderboard when the player is not an object', async () => {
+    const rows = JSON.stringify([{ name: 'Ana', score: 12, ts: 1 }]);
+    for (const bad of ['[]', 'null']) {
+      const legacy = legacyWith({ simplemobilegames_player: bad, birdFlightLeaderboard_v1: rows });
+      const store = asyncStore();
+      await migrateV1({ legacy, store });
+      expect(JSON.parse(store.map.get('leaderboard'))).toHaveLength(1);
+      expect(store.map.has('dopamine_player')).toBe(false);
+    }
+  });
+
+  it('does not overwrite an existing v2 leaderboard or write an empty one', async () => {
+    const rows = JSON.stringify([{ name: 'Ana', score: 12, ts: 1 }]);
+    const store = asyncStore();
+    store.map.set('leaderboard', '[]');
+    await migrateV1({ legacy: legacyWith({ birdFlightLeaderboard_v1: rows }), store });
+    expect(store.map.get('leaderboard')).toBe('[]');
+
+    const empty = asyncStore();
+    await migrateV1({ legacy: legacyWith({ birdFlightLeaderboard_v1: '[{"name":5}]' }), store: empty });
+    expect(empty.map.has('leaderboard')).toBe(false);
+  });
+
+  it('replaces an existing player that is not an object', async () => {
+    const store = asyncStore();
+    store.map.set('dopamine_player', '[1]');
+    await migrateV1({ legacy: legacyWith({ simplemobilegames_player: JSON.stringify(PLAYER) }), store });
+    expect(JSON.parse(store.map.get('dopamine_player'))).toEqual(PLAYER);
+  });
 });

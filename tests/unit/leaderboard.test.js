@@ -43,8 +43,27 @@ describe('leaderboard', () => {
         { name: 'Ben', score: 'x', ts: 1 },
         { name: 'Cy', score: -1, ts: 1 },
         { name: 'Di', score: Infinity, ts: 1 },
+        { name: 'Ed', score: 1, ts: NaN },
+        { name: 'Flo', score: 1, ts: Infinity },
         null,
       ]),
     ).toEqual([{ name: 'Ana', score: 12, ts: 1 }]);
+  });
+
+  it('sanitize applies the name rule, dedupes, sorts and caps at five', () => {
+    const rows = [
+      { name: '  ana ', score: 3, ts: 1 },
+      { name: 'ANA', score: 9, ts: 2 },
+      { name: '  ', score: 5, ts: 3 },
+      { name: 'x'.repeat(30), score: 4, ts: 4 },
+      { name: 'b', score: 1, ts: 5 },
+      { name: 'c', score: 2, ts: 6 },
+      { name: 'd', score: 6, ts: 7 },
+    ];
+    const out = sanitize(rows);
+    expect(out.map((e) => e.score)).toEqual([9, 6, 5, 4, 2]);
+    expect(out[0].name).toBe('ANA');
+    expect(out[2].name).toBe('Anonymous');
+    expect(out[3].name).toHaveLength(16);
   });
 });
