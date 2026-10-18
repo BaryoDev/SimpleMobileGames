@@ -4,7 +4,7 @@ const svg = (body, fill) =>
   } aria-hidden="true">${body}</svg>`;
 
 const digits = (text) =>
-  svg(`<text x="12" y="16" text-anchor="middle" font-size="9" font-weight="700" font-family="sans-serif">${text}</text><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>`, true);
+  svg(`<text x="12" y="16" text-anchor="middle" textLength="${text.length * 4.5}" lengthAdjust="spacingAndGlyphs" font-size="9" font-weight="700" font-family="sans-serif">${text}</text><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>`, true);
 
 export const ICONS = {
   first_game: svg('<path d="M3 12l18-8-6 16-3-7-9-1z"/>'),

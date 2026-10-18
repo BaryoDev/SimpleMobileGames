@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { RewardSystem, DataService } from 'dopaminejs';
 import { createRewards, recordRun, GAME } from '../../src/progression/rewards.js';
 import { ACHIEVEMENTS } from '../../src/progression/achievements.js';
 
@@ -45,12 +46,33 @@ describe('progression', () => {
   it('every achievement has a name, an svg icon and numeric xp', async () => {
     const rewards = await createRewards(memoryStore());
     const entries = Object.entries(rewards.achievements);
-    expect(entries.length).toBeGreaterThanOrEqual(Object.keys(ACHIEVEMENTS).length);
+    expect(entries.length).toBe(10);
     for (const [id, a] of entries) {
       expect(a.name, id).toBeTruthy();
       expect(a.icon.startsWith('<svg'), id).toBe(true);
       expect(/\p{Extended_Pictographic}/u.test(a.icon), id).toBe(false);
       expect(typeof a.xp, id).toBe('number');
+    }
+  });
+
+  it('a bad score never throws and never lowers the total', async () => {
+    const rewards = await createRewards(memoryStore());
+    await recordRun(rewards, 10);
+    for (const bad of [NaN, Infinity, -5]) {
+      await expect(recordRun(rewards, bad)).resolves.not.toThrow();
+      expect(rewards.player.stats[GAME].totalScore).toBeGreaterThanOrEqual(10);
+    }
+    expect(rewards.player.stats[GAME].totalScore).toBe(10);
+  });
+
+  it('level_5 and level_10 match the dopaminejs built-ins', async () => {
+    const builtIns = new RewardSystem(new DataService({ storage: memoryStore() }), {})._initAchievements();
+    for (const id of ['level_5', 'level_10']) {
+      expect(ACHIEVEMENTS[id].name).toBe(builtIns[id].name);
+      expect(ACHIEVEMENTS[id].xp).toBe(builtIns[id].xp);
+      for (const level of [4, 5, 10]) {
+        expect(ACHIEVEMENTS[id].check({ level })).toBe(builtIns[id].check({ level }));
+      }
     }
   });
 });
