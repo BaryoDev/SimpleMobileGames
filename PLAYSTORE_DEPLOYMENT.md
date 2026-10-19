@@ -1,5 +1,16 @@
 # Google Play Store Deployment Guide
 
+The app id is `com.baryodev.birdflight`. Releases go through `scripts/play.mjs`, which uses the Play Developer API:
+
+```bash
+npm run bundle                          # build the signed AAB
+node scripts/play.mjs status            # tracks, bundles, listing, testers
+BF_TESTERS_GROUP=group@example.com node scripts/play.mjs release --dry-run
+BF_TESTERS_GROUP=group@example.com node scripts/play.mjs release
+```
+
+It needs `gcloud auth application-default login` and sends the `x-goog-user-project: baryodev-play` header. Listing text is in `store/listing.json`, release notes in `store/release-notes.txt`, screenshots in `store/screenshots/` (`node scripts/screenshots.mjs`). The manual console steps below are kept for reference.
+
 This guide will walk you through deploying your Bird Flight app to the Google Play Store.
 
 ## Prerequisites
@@ -82,11 +93,11 @@ Edit `android/app/build.gradle.kts`:
 
 ```kotlin
 android {
-    namespace = "com.yourdomain.htmlgames"  // Change this!
+    namespace = "com.baryodev.birdflight"  
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.yourdomain.htmlgames"  // Must be unique!
+        applicationId = "com.baryodev.birdflight"
         minSdk = 24
         targetSdk = 34
         versionCode = 1  // Increment for each release
@@ -99,7 +110,7 @@ Also update `capacitor.config.json`:
 
 ```json
 {
-  "appId": "com.yourdomain.htmlgames",
+  "appId": "com.baryodev.birdflight",
   "appName": "Bird Flight"
 }
 ```
@@ -164,10 +175,10 @@ cd android
 
 ### Main Store Listing
 - **App name**: Bird Flight
-- **Short description**: Tap to flap through the pipes
+- **Short description**: Tap to fly through the pipes. How far can you get?
 - **Full description**: 
   ```
-  Bird Flight is a one-tap flying game. Tap to flap, slip through the pipes and beat your best score.
+  See `store/listing.json`.
   ```
 
 ### Graphics
@@ -202,12 +213,7 @@ Host it on GitHub Pages or any public URL, then add the URL in Play Console.
 1. Go to "Production" > "Create new release"
 2. Upload your AAB file: `android/app/build/outputs/bundle/release/app-release.aab`
 3. Fill in release notes:
-   ```
-   Initial release
-   - Flappy Bird game
-   - Dice Master game  
-   - Sky Ace game
-   ```
+   See `store/release-notes.txt`.
 4. Save and review
 5. Click "Submit for review"
 
@@ -248,12 +254,11 @@ To release an update:
 
 ## Next Steps
 
-1. ✅ Change package name from the placeholder example package
-2. ✅ Create signing key
-3. ✅ Build release AAB
-4. ✅ Prepare app assets (icon, screenshots)
-5. ✅ Create privacy policy
-6. ✅ Register Play Console account
-7. ✅ Create and submit app
+1. Package name is com.baryodev.birdflight
+2. Create signing key
+3. Build release AAB
+4. Prepare app assets (icon, screenshots)
+5. Create privacy policy
+6. Register Play Console account
+7. Create and submit app
 
-Good luck with your app launch! 🚀

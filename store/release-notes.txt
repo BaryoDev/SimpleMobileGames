@@ -1,0 +1,1 @@
+Bird Flight is now its own app. Rebuilt for smoother play on every screen, with haptics, pause on back, and your old scores carried over.
