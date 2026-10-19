@@ -1,0 +1,10 @@
+{
+  "appId": "com.baryodev.birdflight",
+  "appName": "Bird Flight",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}

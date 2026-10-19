@@ -1,6 +1,17 @@
 # Google Play Store Deployment Guide
 
-This guide will walk you through deploying your HTML Games app to the Google Play Store.
+The app id is `com.baryodev.birdflight`. Releases go through `scripts/play.mjs`, which uses the Play Developer API:
+
+```bash
+npm run bundle                          # build the signed AAB
+node scripts/play.mjs status            # tracks, bundles, listing, testers
+node scripts/play.mjs release --dry-run
+node scripts/play.mjs release
+```
+
+It needs `gcloud auth application-default login` and sends the `x-goog-user-project: baryodev-play` header. Listing text is in `store/listing.json`, release notes in `store/release-notes.txt`, screenshots in `store/screenshots/` (`node scripts/screenshots.mjs`). The manual console steps below are kept for reference.
+
+This guide will walk you through deploying your Bird Flight app to the Google Play Store.
 
 ## Prerequisites
 
@@ -15,7 +26,7 @@ Android apps must be signed before they can be uploaded to Play Store.
 
 ```bash
 # Navigate to your project
-cd /Users/arnelirobles/Documents/repos/HTMLGames/android
+cd android
 
 # Generate a keystore (you'll be asked to create a password)
 keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
@@ -82,11 +93,11 @@ Edit `android/app/build.gradle.kts`:
 
 ```kotlin
 android {
-    namespace = "com.yourdomain.htmlgames"  // Change this!
+    namespace = "com.baryodev.birdflight"  
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.yourdomain.htmlgames"  // Must be unique!
+        applicationId = "com.baryodev.birdflight"
         minSdk = 24
         targetSdk = 34
         versionCode = 1  // Increment for each release
@@ -99,8 +110,8 @@ Also update `capacitor.config.json`:
 
 ```json
 {
-  "appId": "com.yourdomain.htmlgames",
-  "appName": "Game Hub"
+  "appId": "com.baryodev.birdflight",
+  "appName": "Bird Flight"
 }
 ```
 
@@ -153,7 +164,7 @@ cd android
 
 1. Click "Create app"
 2. Fill in:
-   - App name: "Game Hub" (or your preferred name)
+   - App name: "Bird Flight" (or your preferred name)
    - Default language: English
    - App or game: Game
    - Free or paid: Free
@@ -163,17 +174,11 @@ cd android
 ## Step 8: Complete Store Listing
 
 ### Main Store Listing
-- **App name**: Game Hub
-- **Short description**: Classic arcade games in one app
+- **App name**: Bird Flight
+- **Short description**: Tap to fly through the pipes. How far can you get?
 - **Full description**: 
   ```
-  Enjoy three classic arcade-style games:
-  
-  🐦 Flappy Bird - Navigate through pipes
-  🎲 Dice Master - Predict the roll
-  ✈️ Sky Ace - Vertical shooter action
-  
-  All games feature smooth gameplay and retro fun!
+  See `store/listing.json`.
   ```
 
 ### Graphics
@@ -191,11 +196,11 @@ cd android
 Create a simple privacy policy:
 
 ```markdown
-# Privacy Policy for Game Hub
+# Privacy Policy for Bird Flight
 
 We do not collect, store, or share any personal information.
 This app does not require internet permissions.
-All games run locally on your device.
+The game runs locally on your device.
 
 Contact: your-email@example.com
 Last updated: [Current Date]
@@ -208,12 +213,7 @@ Host it on GitHub Pages or any public URL, then add the URL in Play Console.
 1. Go to "Production" > "Create new release"
 2. Upload your AAB file: `android/app/build/outputs/bundle/release/app-release.aab`
 3. Fill in release notes:
-   ```
-   Initial release
-   - Flappy Bird game
-   - Dice Master game  
-   - Sky Ace game
-   ```
+   See `store/release-notes.txt`.
 4. Save and review
 5. Click "Submit for review"
 
@@ -254,12 +254,11 @@ To release an update:
 
 ## Next Steps
 
-1. ✅ Change package name from `com.example.htmlgames`
-2. ✅ Create signing key
-3. ✅ Build release AAB
-4. ✅ Prepare app assets (icon, screenshots)
-5. ✅ Create privacy policy
-6. ✅ Register Play Console account
-7. ✅ Create and submit app
+1. Package name is com.baryodev.birdflight
+2. Create signing key
+3. Build release AAB
+4. Prepare app assets (icon, screenshots)
+5. Create privacy policy
+6. Register Play Console account
+7. Create and submit app
 
-Good luck with your app launch! 🚀
