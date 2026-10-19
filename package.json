@@ -11,7 +11,7 @@
     "sync": "npm run build && cap sync android",
     "bundle": "npm run sync && cd android && JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew bundleRelease",
     "apk": "npm run sync && cd android && JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew assembleDebug",
-    "deploy": "npm run apk && ~/Library/Android/sdk/platform-tools/adb -s R3CT50BYRVY install -r android/app/build/outputs/apk/debug/app-debug.apk && ~/Library/Android/sdk/platform-tools/adb -s R3CT50BYRVY shell am start -n com.baryodev.birdflight/.MainActivity"
+    "deploy": "npm run apk && ~/Library/Android/sdk/platform-tools/adb install -r android/app/build/outputs/apk/debug/app-debug.apk && ~/Library/Android/sdk/platform-tools/adb shell am start -n com.baryodev.birdflight/.MainActivity"
   },
   "repository": {
     "type": "git",

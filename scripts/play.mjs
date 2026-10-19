@@ -84,8 +84,6 @@ async function status() {
 }
 
 async function release({ dryRun }) {
-  const group = process.env.BF_TESTERS_GROUP;
-  if (!group) throw new Error('set BF_TESTERS_GROUP to the testers Google group address');
   if (!existsSync(AAB)) throw new Error(`missing bundle at ${AAB}, run npm run bundle`);
   const notes = readFileSync(join(ROOT, 'store/release-notes.txt'), 'utf8').trim();
   const listing = JSON.parse(readFileSync(join(ROOT, 'store/listing.json'), 'utf8'));
@@ -134,8 +132,6 @@ async function release({ dryRun }) {
     }
     console.log(`uploaded ${shots.length} screenshots`);
 
-    await call('PUT', `${base}/testers/${TRACK}`, { json: { googleGroups: [group] } });
-    console.log(`set ${TRACK} testers`);
 
     await call('POST', `${base}:validate`);
     console.log('validate ok');
@@ -149,6 +145,7 @@ async function release({ dryRun }) {
     await call('POST', `${base}:commit`);
     committed = true;
     console.log('commit ok');
+    console.log('testers: add the Google group in Play Console, Test and release, Closed testing, Testers. The API cannot set testers on a closed testing track.');
   } catch (e) {
     if (!committed) await dropEdit(edit.id).catch(() => {});
     throw e;
