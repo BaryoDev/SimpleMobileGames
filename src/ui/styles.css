@@ -139,7 +139,7 @@ html, body {
   color: #fff;
   font-size: 0.85rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #ee7410, #d9650a);
+  background: linear-gradient(135deg, #c95a0c, #b44a08);
   border-radius: 999px;
 }
 .box .score-line, .box .best-line { font-weight: bold; }
@@ -171,14 +171,14 @@ html, body {
   font-size: 1.1rem;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(180deg, #ee7410, var(--accent));
+  background: linear-gradient(180deg, #c95a0c, #b44a08);
   border: none;
   border-radius: 999px;
-  box-shadow: 0 5px 0 var(--accent-dark), 0 10px 18px rgba(217, 101, 10, 0.3);
+  box-shadow: 0 5px 0 #8a3804, 0 10px 18px rgba(138, 56, 4, 0.3);
   cursor: pointer;
   transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
 }
-.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--accent-dark), 0 3px 6px rgba(217, 101, 10, 0.3); }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #8a3804, 0 3px 6px rgba(138, 56, 4, 0.3); }
 .btn:focus-visible, .icon-btn:focus-visible { outline: 3px solid var(--card-ink); outline-offset: 3px; }
 
 .board { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
