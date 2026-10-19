@@ -248,7 +248,7 @@ To release an update:
 
 ## Next Steps
 
-1. ✅ Change package name from `com.example.htmlgames`
+1. ✅ Change package name from the placeholder example package
 2. ✅ Create signing key
 3. ✅ Build release AAB
 4. ✅ Prepare app assets (icon, screenshots)

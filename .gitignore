@@ -5,7 +5,6 @@ android/.gradle/
 android/app/build/
 android/app/src/main/assets/public/
 www/
-capacitor.config.json
 .DS_Store
 
 # Sensitive files - Never commit these!
