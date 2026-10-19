@@ -153,3 +153,49 @@ test('the over screen still shows when saving fails', async ({ page }) => {
   await expect.poll(() => warnings.some((w) => w.includes('could not'))).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test('the start card says Bird Flight and the name placeholder is Player', async ({ page }) => {
+  await page.goto('/?test=1');
+  await expect(page.getByRole('heading', { name: 'Bird Flight', exact: true })).toBeVisible();
+  await expect(page.locator('#player-name')).toHaveAttribute('placeholder', 'Player');
+});
+
+test('the name is prefilled from the newest v1 leaderboard entry', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (window.localStorage.getItem('seeded')) return;
+    window.localStorage.setItem('seeded', '1');
+    window.localStorage.setItem(
+      'birdFlightLeaderboard_v1',
+      JSON.stringify([
+        { name: 'Older', score: 9, ts: 1000 },
+        { name: 'Newest', score: 3, ts: 2000 },
+      ]),
+    );
+  });
+  await page.goto('/?test=1');
+  await expect(page.locator('#player-name')).toHaveValue('Newest');
+});
+
+test('the sky phase follows the score and game over shows a medal', async ({ page }) => {
+  await start(page);
+  await page.locator('#game').click({ position: { x: 100, y: 300 } });
+  await expect(page.locator('html')).toHaveAttribute('data-phase', 'morning');
+  await page.evaluate(() => {
+    const w = window.__bf.world;
+    w.bird.y = 300;
+    w.bird.vy = 0;
+    w.score = 9;
+    w.pipes = [{ x: w.bird.x - 60, top: 225, gap: 150, passed: false, nearMiss: false }];
+  });
+  await expect(page.locator('#hud-score')).toHaveText('10');
+  await expect(page.locator('html')).toHaveAttribute('data-phase', 'day');
+  await expect(page.locator('#screen-over')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.medal')).toHaveAttribute('data-medal', 'bronze');
+  await expect(page.locator('.new-best')).toBeVisible();
+});
+
+test('no medal below 10', async ({ page }) => {
+  await start(page);
+  await crash(page);
+  await expect(page.locator('.medal')).toBeHidden();
+});

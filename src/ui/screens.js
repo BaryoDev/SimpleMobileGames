@@ -1,3 +1,6 @@
+import { phaseFor } from '../game/palette.js';
+import { medalFor, medalElement } from './medals.js';
+
 const OVER_GUARD_MS = 400;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -69,7 +72,7 @@ export function createScreens(root, handlers) {
     id: 'player-name',
     type: 'text',
     maxlength: '16',
-    placeholder: 'Player 1',
+    placeholder: 'Player',
     autocomplete: 'off',
     autocapitalize: 'words',
     'aria-label': 'Your name',
@@ -77,7 +80,7 @@ export function createScreens(root, handlers) {
   const bestReady = el('span', { id: 'best', text: '0' });
   const startBtn = el('button', { type: 'submit', class: 'btn', text: 'Start' });
   const startForm = el('form', { class: 'box', 'data-ui': '' },
-    el('h1', { text: 'Bird flight' }),
+    el('h1', { text: 'Bird Flight' }),
     el('label', { for: 'player-name', text: 'Your name' }),
     nameInput,
     el('p', { class: 'best-line' }, 'Best ', bestReady),
@@ -92,6 +95,8 @@ export function createScreens(root, handlers) {
   const finalScore = el('span', { id: 'final-score', text: '0' });
   const bestOver = el('span', { id: 'best-over', text: '0' });
   const newBest = el('p', { class: 'new-best', text: 'New best' });
+  const medalSlot = el('div', { class: 'medal', role: 'img' });
+  const medalName = el('p', { class: 'medal-name' });
   const boardBody = el('tbody');
   const board = el('table', { id: 'board', class: 'board' },
     el('thead', {}, el('tr', {}, el('th', { text: '#' }), el('th', { text: 'Name' }), el('th', { text: 'Score' }))),
@@ -100,6 +105,8 @@ export function createScreens(root, handlers) {
   const restartBtn = el('button', { type: 'button', class: 'btn', text: 'Restart' });
   const overBox = el('div', { class: 'box', 'data-ui': '' },
     el('h1', { text: 'Game over' }),
+    medalSlot,
+    medalName,
     el('p', { class: 'score-line' }, 'Score ', finalScore),
     el('p', { class: 'best-line' }, 'Best ', bestOver),
     newBest,
@@ -126,6 +133,9 @@ export function createScreens(root, handlers) {
   show(flapHint, false);
   show(overScreen, false);
   show(pausedScreen, false);
+  show(medalSlot, false);
+  show(medalName, false);
+  document.documentElement.dataset.phase = 'morning';
 
   let overShownAt = 0;
 
@@ -168,6 +178,7 @@ export function createScreens(root, handlers) {
       nameInput.value = name ?? '';
     },
     showReady(best) {
+      document.documentElement.dataset.phase = 'morning';
       bestReady.textContent = String(best);
       show(readyScreen, true);
       show(overScreen, false);
@@ -184,6 +195,7 @@ export function createScreens(root, handlers) {
     },
     showScore(n) {
       hud.textContent = String(n);
+      document.documentElement.dataset.phase = phaseFor(n);
       if (n > 0) show(flapHint, false);
     },
     hideFlapHint() {
@@ -193,6 +205,15 @@ export function createScreens(root, handlers) {
       finalScore.textContent = String(score);
       bestOver.textContent = String(best);
       show(newBest, score > 0 && score >= best);
+      const medal = medalFor(score);
+      const art = medal ? medalElement(medal) : null;
+      medalSlot.replaceChildren(...(art ? [art] : []));
+      medalSlot.dataset.medal = medal ?? '';
+      const label = medal ? `${medal[0].toUpperCase()}${medal.slice(1)} medal` : '';
+      medalSlot.setAttribute('aria-label', label);
+      medalName.textContent = label;
+      show(medalSlot, Boolean(art));
+      show(medalName, Boolean(art));
       renderBoard(entries, run);
       show(hud, false);
       show(flapHint, false);

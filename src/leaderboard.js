@@ -4,7 +4,7 @@ const MAX_ENTRIES = 5;
 const MAX_NAME = 16;
 
 function cleanName(name) {
-  return String(name ?? '').trim().slice(0, MAX_NAME) || 'Anonymous';
+  return String(name ?? '').trim().slice(0, MAX_NAME) || 'Player';
 }
 
 function ranked(entries) {

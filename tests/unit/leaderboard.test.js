@@ -16,10 +16,10 @@ describe('leaderboard', () => {
     expect(entries[0]).toMatchObject({ score: 15, ts: 3 });
   });
 
-  it('blank name becomes Anonymous', () => {
+  it('blank name becomes Player', () => {
     const { entries, run } = addScore([], '   ', 4, 1);
-    expect(run.name).toBe('Anonymous');
-    expect(entries[0].name).toBe('Anonymous');
+    expect(run.name).toBe('Player');
+    expect(entries[0].name).toBe('Player');
   });
 
   it('top five only', () => {
@@ -63,7 +63,7 @@ describe('leaderboard', () => {
     const out = sanitize(rows);
     expect(out.map((e) => e.score)).toEqual([9, 6, 5, 4, 2]);
     expect(out[0].name).toBe('ANA');
-    expect(out[2].name).toBe('Anonymous');
+    expect(out[2].name).toBe('Player');
     expect(out[3].name).toHaveLength(16);
   });
 });

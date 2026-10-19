@@ -118,11 +118,15 @@ async function boot() {
     console.warn('[bird-flight] could not read saved data', error);
   }
 
+  if (!playerName && board.length > 0) {
+    playerName = board.reduce((a, b) => (b.ts > a.ts ? b : a)).name;
+  }
+
   const savedBest = rewards?.player?.stats?.[GAME]?.highScore ?? 0;
   let best = Math.max(savedBest, ...board.map((e) => e.score), 0);
 
   const canvas = document.getElementById('game');
-  const game = new Game({ canvas, width: window.innerWidth, height: window.innerHeight, backgroundColor: '#70c5ce' });
+  const game = new Game({ canvas, width: window.innerWidth, height: window.innerHeight, backgroundColor: '#9fd0f2' });
   const particles = new ParticleSystem();
   const gameUI = new GameUI(particles);
   const sound = new SoundManager({ storage: guardedLocalStorage() });

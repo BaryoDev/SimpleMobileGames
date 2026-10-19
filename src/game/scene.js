@@ -76,6 +76,6 @@ export class FlightScene extends Scene {
 
   render(ctx) {
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    drawWorld(ctx, this.world, this.alpha, performance.now() / 1000, this._prevY);
+    drawWorld(ctx, this.world, this.alpha, performance.now() / 1000, this._prevY, this.dpr);
   }
 }
