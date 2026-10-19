@@ -102,7 +102,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--sat) + 76px) calc(var(--sar) + 12px) calc(var(--sab) + 12px) calc(var(--sal) + 12px);
+  padding: calc(var(--sat) + 76px) calc(var(--sar) + 12px) calc(var(--sab) + 128px) calc(var(--sal) + 12px);
 }
 
 .box {
@@ -233,12 +233,13 @@ html, body {
   pointer-events: auto;
   transition: transform 0.08s ease-out;
 }
+#screen-over:not([hidden]) ~ #mute { display: none; }
 .icon-btn svg { width: 22px; height: 22px; }
 .icon-btn:active { transform: scale(0.92); }
 
 .toasts {
   position: absolute;
-  top: calc(var(--sat) + 140px);
+  bottom: calc(var(--sab) + 14px);
   left: calc(var(--sal) + 12px);
   right: calc(var(--sar) + 12px);
   display: flex;
@@ -252,7 +253,7 @@ html, body {
   align-items: center;
   gap: 10px;
   width: min(320px, 100%);
-  padding: 10px 14px;
+  padding: 7px 14px;
   color: var(--card-ink);
   background: var(--card-bg);
   border: 1px solid var(--card-edge);
@@ -291,7 +292,8 @@ html, body {
 }
 
 @media (max-height: 500px) {
-  .screen { padding-top: calc(var(--sat) + 60px); }
+  .screen { padding-top: calc(var(--sat) + 60px); padding-bottom: calc(var(--sab) + 12px); }
+  .toasts { bottom: calc(var(--sab) + 6px); }
   .hud { top: calc(var(--sat) + 64px); font-size: 3rem; }
   .icon-btn { top: calc(var(--sat) + 62px); }
   .box { padding: 10px 14px; gap: 6px; border-radius: 20px; }

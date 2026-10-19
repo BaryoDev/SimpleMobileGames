@@ -20,7 +20,7 @@ export const PHASES = [
       pipe: '#5cc43a', pipeLight: '#8ae85f', pipeDark: '#3a9a28',
       ground: '#dccb94', groundTop: '#6cc443', groundMark: '#c9b67c',
       cloud: '#ffffff', orb: '#fff6c0', glow: '#fff0a0',
-      cloudA: 0.92, star: 0, moon: 0, orbX: 0.42, orbY: 0.16,
+      cloudA: 0.92, star: 0, moon: 0, orbX: 0.2, orbY: 0.16,
     },
   },
   {
@@ -32,7 +32,7 @@ export const PHASES = [
       pipe: '#86b23f', pipeLight: '#b6d85e', pipeDark: '#5c8a33',
       ground: '#c9946e', groundTop: '#7a9a3a', groundMark: '#b07f5c',
       cloud: '#ffc2c8', orb: '#ffd9a0', glow: '#ff9a5a',
-      cloudA: 0.8, star: 0, moon: 0, orbX: 0.5, orbY: 0.64,
+      cloudA: 0.8, star: 0, moon: 0, orbX: 0.3, orbY: 0.64,
     },
   },
   {
@@ -44,7 +44,7 @@ export const PHASES = [
       pipe: '#2d7a52', pipeLight: '#4aa874', pipeDark: '#1b5238',
       ground: '#3a3a5c', groundTop: '#2f6a4a', groundMark: '#2e2e4c',
       cloud: '#8a93c8', orb: '#f3f1dc', glow: '#b8c4ff',
-      cloudA: 0, star: 1, moon: 1, orbX: 0.6, orbY: 0.22,
+      cloudA: 0, star: 1, moon: 1, orbX: 0.2, orbY: 0.22,
     },
   },
 ];
