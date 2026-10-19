@@ -3,6 +3,7 @@ import { medalFor, medalElement } from './medals.js';
 
 const OVER_GUARD_MS = 400;
 const SVG_NS = 'http://www.w3.org/2000/svg';
+export const PRIVACY_URL = 'https://baryo.dev/privacy/bird-flight/';
 
 const SVG_ELEMENTS = new Set([
   'svg', 'g', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse',
@@ -86,6 +87,7 @@ export function createScreens(root, handlers) {
     el('p', { class: 'best-line' }, 'Best ', bestReady),
     startBtn,
     el('p', { class: 'hint', text: 'Tap, click or press space to flap' }),
+    el('a', { class: 'privacy', href: PRIVACY_URL, target: '_blank', rel: 'noopener', text: 'Privacy policy' }),
   );
   const readyScreen = el('div', { id: 'screen-ready', class: 'screen' }, startForm);
 

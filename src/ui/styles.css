@@ -134,6 +134,7 @@ html, body {
 .box p { margin: 0; color: var(--card-ink); font-size: 1.05rem; }
 .box label { color: var(--card-sub); font-size: 0.9rem; }
 .box .hint { color: var(--card-sub); font-size: 0.85rem; }
+.box .privacy { color: var(--card-sub); font-size: 0.8rem; text-decoration: underline; }
 .box .new-best {
   padding: 2px 12px;
   color: #fff;
