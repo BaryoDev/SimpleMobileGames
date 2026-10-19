@@ -139,7 +139,7 @@ html, body {
   color: #fff;
   font-size: 0.85rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #c95a0c, #b44a08);
+  background: linear-gradient(135deg, #b8500a, #b44a08);
   border-radius: 999px;
 }
 .box .score-line, .box .best-line { font-weight: bold; }
@@ -171,7 +171,7 @@ html, body {
   font-size: 1.1rem;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(180deg, #c95a0c, #b44a08);
+  background: linear-gradient(180deg, #b8500a, #b44a08);
   border: none;
   border-radius: 999px;
   box-shadow: 0 5px 0 #8a3804, 0 10px 18px rgba(138, 56, 4, 0.3);
