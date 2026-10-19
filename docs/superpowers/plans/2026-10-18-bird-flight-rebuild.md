@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Repo `~/Documents/repos/HTMLGames`, work on branch `bird-flight-v2` off `main`.
+- Repo `~/repos/SimpleMobileGames`, work on branch `bird-flight-v2` off `main`.
 - Package name `com.baryodev.birdflight`. Keystore `android/app/my-release-key.keystore` and `android/keystore.properties` are never moved, printed, logged or committed.
 - `versionCode 3`, `versionName "2.0.0"`.
 - `compileSdkVersion 36`, `targetSdkVersion 36`, `minSdkVersion 24` (Capacitor 8 floor).

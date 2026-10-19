@@ -49,7 +49,7 @@ says to, not around it.
 
 ## Constraints
 
-- Repo stays `~/Documents/repos/HTMLGames` (remote `BaryoDev/SimpleMobileGames`), branch off
+- Repo stays `~/repos/SimpleMobileGames` (remote `BaryoDev/SimpleMobileGames`), branch off
   `main`.
 - Package name `com.baryodev.birdflight` and the existing upload keystore
   (`android/app/my-release-key.keystore`, `android/keystore.properties`, both gitignored) stay.

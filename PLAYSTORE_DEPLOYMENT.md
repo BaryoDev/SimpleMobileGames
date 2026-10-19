@@ -15,7 +15,7 @@ Android apps must be signed before they can be uploaded to Play Store.
 
 ```bash
 # Navigate to your project
-cd /Users/arnelirobles/Documents/repos/HTMLGames/android
+cd android
 
 # Generate a keystore (you'll be asked to create a password)
 keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
