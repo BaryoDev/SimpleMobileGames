@@ -119,7 +119,8 @@ async function boot() {
   }
 
   if (!playerName && board.length > 0) {
-    playerName = board.reduce((a, b) => (b.ts > a.ts ? b : a)).name;
+    const newest = board.reduce((a, b) => (b.ts > a.ts ? b : a)).name;
+    if (newest !== 'Anonymous') playerName = newest;
   }
 
   const savedBest = rewards?.player?.stats?.[GAME]?.highScore ?? 0;
@@ -221,8 +222,9 @@ async function boot() {
     } catch (error) {
       console.warn('[bird-flight] could not rank the run', error);
     }
+    const previousBest = best;
     best = Math.max(best, score);
-    screens.showOver(score, best, board, run);
+    screens.showOver(score, best, board, run, previousBest);
     persistRun(score, board);
   }
 

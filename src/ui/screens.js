@@ -201,10 +201,10 @@ export function createScreens(root, handlers) {
     hideFlapHint() {
       show(flapHint, false);
     },
-    showOver(score, best, entries, run) {
+    showOver(score, best, entries, run, previousBest = best) {
       finalScore.textContent = String(score);
       bestOver.textContent = String(best);
-      show(newBest, score > 0 && score >= best);
+      show(newBest, score > 0 && score > previousBest);
       const medal = medalFor(score);
       const art = medal ? medalElement(medal) : null;
       medalSlot.replaceChildren(...(art ? [art] : []));

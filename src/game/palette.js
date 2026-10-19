@@ -41,7 +41,7 @@ export const PHASES = [
     colors: {
       top: '#0b1437', mid: '#1b2260', bottom: '#3a2f7a',
       far: '#25306b', hillMid: '#1b2556', near: '#141b44', tree: '#0e1436',
-      pipe: '#2d7a52', pipeLight: '#4aa874', pipeDark: '#1b5238',
+      pipe: '#1f5c42', pipeLight: '#2f8560', pipeDark: '#123a2a',
       ground: '#3a3a5c', groundTop: '#2f6a4a', groundMark: '#2e2e4c',
       cloud: '#8a93c8', orb: '#f3f1dc', glow: '#b8c4ff',
       cloudA: 0, star: 1, moon: 1, orbX: 0.2, orbY: 0.22,

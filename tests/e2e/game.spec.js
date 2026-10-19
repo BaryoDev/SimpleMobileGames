@@ -199,3 +199,38 @@ test('no medal below 10', async ({ page }) => {
   await crash(page);
   await expect(page.locator('.medal')).toBeHidden();
 });
+
+test('New best is not shown when a run only ties the best', async ({ page }) => {
+  const scoreOne = async () => {
+    await page.locator('#game').click({ position: { x: 100, y: 300 } });
+    await page.evaluate(() => {
+      const w = window.__bf.world;
+      w.bird.y = 300;
+      w.bird.vy = 0;
+      w.pipes = [{ x: w.bird.x - 60, top: 225, gap: 150, passed: false, nearMiss: false }];
+    });
+    await expect(page.locator('#hud-score')).toHaveText('1');
+    await expect(page.locator('#screen-over')).toBeVisible({ timeout: 15000 });
+  };
+  await start(page);
+  await scoreOne();
+  await expect(page.locator('.new-best')).toBeVisible();
+  await restart(page);
+  await page.getByRole('button', { name: 'Start', exact: true }).click();
+  await scoreOne();
+  await expect(page.locator('#best-over')).toHaveText('1');
+  await expect(page.locator('.new-best')).toBeHidden();
+});
+
+test('an Anonymous v1 entry does not prefill the name', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (window.localStorage.getItem('seeded')) return;
+    window.localStorage.setItem('seeded', '1');
+    window.localStorage.setItem(
+      'birdFlightLeaderboard_v1',
+      JSON.stringify([{ name: 'Anonymous', score: 4, ts: 2000 }]),
+    );
+  });
+  await page.goto('/?test=1');
+  await expect(page.locator('#player-name')).toHaveValue('');
+});

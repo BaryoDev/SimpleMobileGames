@@ -3,6 +3,7 @@ import { phaseFor, colorsOf, skyAt } from './palette.js';
 import { createScenery } from './scenery.js';
 
 const BLEND_SECONDS = 1.5;
+const BLEND_STEPS = 24;
 const FLAP_SECONDS = 0.28;
 const TAU = Math.PI * 2;
 const LIP = 22;
@@ -43,11 +44,16 @@ function roundedRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+function tile(ctx, canvas, y, width, px, alpha, h) {
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(canvas, -px, y, width, h);
+  ctx.drawImage(canvas, width - px, y, width, h);
+}
+
 const smooth = (t) => t * t * (3 - 2 * t);
 
 export function createRenderer({ reducedMotion } = {}) {
   const scenery = createScenery();
-  const scratch = {};
   let reduced = reducedMotion ?? prefersReducedMotion();
   let curIdx = 0;
   let curPhase = 'morning';
@@ -58,6 +64,7 @@ export function createRenderer({ reducedMotion } = {}) {
   let lastWorld = null;
   let lastVy = 0;
   let wingStart = -10;
+  let table = null;
 
   if (reducedMotion === undefined && typeof matchMedia === 'function') {
     try {
@@ -71,13 +78,8 @@ export function createRenderer({ reducedMotion } = {}) {
 
   function drawLayer(ctx, key, y, width, offset, dpr) {
     const px = Math.floor(offset * dpr) / dpr;
-    const draw = (canvas, alpha) => {
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(canvas, -px, y, width, scenery.stripH);
-      ctx.drawImage(canvas, width - px, y, width, scenery.stripH);
-    };
-    if (blending) draw(scenery.set(1 - curIdx)[key], 1);
-    draw(scenery.set(curIdx)[key], blending ? blendEase : 1);
+    if (blending) tile(ctx, scenery.set(1 - curIdx)[key], y, width, px, 1, scenery.stripH);
+    tile(ctx, scenery.set(curIdx)[key], y, width, px, blending ? blendEase : 1, scenery.stripH);
     ctx.globalAlpha = 1;
   }
 
@@ -121,7 +123,8 @@ export function createRenderer({ reducedMotion } = {}) {
   function drawStars(ctx, c, width, floorY, time) {
     if (c.star < 0.01) return;
     ctx.fillStyle = '#fff';
-    for (const s of STARS) {
+    for (let i = 0; i < STARS.length; i += 1) {
+      const s = STARS[i];
       const drift = reduced ? 0 : time * 3;
       const x = (((s.x * width - drift) % width) + width) % width;
       const twinkle = reduced ? 1 : 0.55 + 0.45 * Math.sin(time * 2.2 + s.p);
@@ -137,7 +140,8 @@ export function createRenderer({ reducedMotion } = {}) {
     if (c.cloudA < 0.01) return;
     ctx.fillStyle = c.cloud;
     ctx.globalAlpha = c.cloudA;
-    for (const cl of CLOUDS) {
+    for (let i = 0; i < CLOUDS.length; i += 1) {
+      const cl = CLOUDS[i];
       const span = width + cl.w * 2;
       const drift = reduced ? 0 : time * cl.s;
       const x = (((cl.x * width - drift) % span) + span) % span - cl.w;
@@ -181,7 +185,8 @@ export function createRenderer({ reducedMotion } = {}) {
     const floorY = world.height - RULES.groundHeight;
     const w = RULES.pipeWidth;
     const lw = w + LIP_OVERHANG * 2;
-    for (const p of world.pipes) {
+    for (let i = 0; i < world.pipes.length; i += 1) {
+      const p = world.pipes[i];
       const bottomY = p.top + p.gap;
       const x = p.x;
       const lx = x - LIP_OVERHANG;
@@ -196,8 +201,8 @@ export function createRenderer({ reducedMotion } = {}) {
         ctx.fillStyle = c.pipeDark;
         ctx.fillRect(x + w - 14, y0, 12, h);
       }
-      const lips = [p.top - LIP, bottomY];
-      for (const ly of lips) {
+      for (let k = 0; k < 2; k += 1) {
+        const ly = k === 0 ? p.top - LIP : bottomY;
         roundedRect(ctx, lx, ly, lw, LIP, 7);
         ctx.fillStyle = c.pipe;
         ctx.fill();
@@ -313,7 +318,7 @@ export function createRenderer({ reducedMotion } = {}) {
     } else if (target !== curPhase) {
       prevPhase = curPhase;
       curPhase = target;
-      if (reduced) {
+      if (reduced || blending) {
         blending = false;
         scenery.paint(curIdx, colorsOf(curPhase));
       } else {
@@ -321,6 +326,10 @@ export function createRenderer({ reducedMotion } = {}) {
         scenery.paint(curIdx, colorsOf(curPhase));
         blending = true;
         blendStart = time;
+        table = [];
+        for (let i = 0; i < BLEND_STEPS; i += 1) {
+          table.push(skyAt(prevPhase, curPhase, smooth((i + 1) / BLEND_STEPS)));
+        }
       }
     }
     if (blending) {
@@ -332,7 +341,7 @@ export function createRenderer({ reducedMotion } = {}) {
         blendEase = smooth(Math.max(0, t));
       }
     }
-    return blending ? skyAt(prevPhase, curPhase, blendEase, scratch) : colorsOf(curPhase);
+    return blending ? table[Math.min(BLEND_STEPS - 1, Math.floor(blendEase * BLEND_STEPS))] : colorsOf(curPhase);
   }
 
   return {
@@ -344,7 +353,7 @@ export function createRenderer({ reducedMotion } = {}) {
       const { width, height } = world;
       const floorY = height - RULES.groundHeight;
       const top = floorY - scenery.stripH;
-      const speedOffset = (k) => (reduced ? 0 : (world.distance * k) % width);
+      const d = reduced ? 0 : world.distance;
 
       if (blending) ctx.drawImage(scenery.set(1 - curIdx).sky, 0, 0, width, floorY);
       ctx.globalAlpha = blending ? blendEase : 1;
@@ -356,9 +365,9 @@ export function createRenderer({ reducedMotion } = {}) {
       drawOrb(ctx, c, width, floorY);
       drawStars(ctx, c, width, floorY, time);
       drawClouds(ctx, c, width, floorY, time);
-      drawLayer(ctx, 'far', top, width, speedOffset(0.1), dpr);
-      drawLayer(ctx, 'mid', top, width, speedOffset(0.3), dpr);
-      drawLayer(ctx, 'near', top, width, speedOffset(0.6), dpr);
+      drawLayer(ctx, 'far', top, width, (d * 0.1) % width, dpr);
+      drawLayer(ctx, 'mid', top, width, (d * 0.3) % width, dpr);
+      drawLayer(ctx, 'near', top, width, (d * 0.6) % width, dpr);
       drawGround(ctx, c, world);
       drawPipes(ctx, c, world);
       drawBird(ctx, world, alpha, time, prevY);
