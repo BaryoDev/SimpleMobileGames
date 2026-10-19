@@ -20,7 +20,13 @@ Bird Flight operates entirely offline and does not:
 
 ## Data Storage
 
-Your best score and settings are stored locally on your device only. We do not have access to this information, and it is never transmitted to our servers or third parties.
+The app keeps these on your device only:
+- the player name you type
+- your scores and the local leaderboard, which holds player names
+- your level, XP, streak and achievements
+- whether sound is muted
+
+We do not have access to this information, and it is never transmitted to our servers or third parties.
 
 ## Third-Party Services
 
@@ -32,7 +38,7 @@ Our app does not collect any information from anyone, including children under t
 
 ## Permissions
 
-Bird Flight does not require any special permissions to function. If your device requests permissions, they are not being used by our app.
+Bird Flight uses the vibrate permission to buzz on a flap, a score and a crash. The app shell also declares the internet permission, but the game makes no network requests.
 
 ## Changes to This Privacy Policy
 

@@ -330,4 +330,7 @@ async function boot() {
   }
 }
 
-boot().catch((error) => console.error('[bird-flight] failed to start', error));
+boot().catch((error) => {
+  console.error('[bird-flight] failed to start', error);
+  safe(() => Promise.resolve(SplashScreen.hide()).catch(() => {}));
+});

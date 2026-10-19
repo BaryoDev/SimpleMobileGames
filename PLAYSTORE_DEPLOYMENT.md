@@ -5,8 +5,8 @@ The app id is `com.baryodev.birdflight`. Releases go through `scripts/play.mjs`,
 ```bash
 npm run bundle                          # build the signed AAB
 node scripts/play.mjs status            # tracks, bundles, listing, testers
-BF_TESTERS_GROUP=group@example.com node scripts/play.mjs release --dry-run
-BF_TESTERS_GROUP=group@example.com node scripts/play.mjs release
+node scripts/play.mjs release --dry-run
+node scripts/play.mjs release
 ```
 
 It needs `gcloud auth application-default login` and sends the `x-goog-user-project: baryodev-play` header. Listing text is in `store/listing.json`, release notes in `store/release-notes.txt`, screenshots in `store/screenshots/` (`node scripts/screenshots.mjs`). The manual console steps below are kept for reference.
